@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { createOrder } from "@/lib/db";
+import { createOrder, reserveInventory, releaseInventory } from "@/lib/db";
 import type { CartItem } from "@/contexts/CartContext";
 
 type RequestBody = {
@@ -31,10 +31,30 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
 
+  const { env } = await getCloudflareContext({ async: true });
+
+  // Atomically reserve inventory for each item before touching Razorpay.
+  // This ensures two simultaneous orders for the last unit can't both succeed.
+  const reserved: CartItem[] = [];
+  for (const item of items) {
+    const product = await reserveInventory(env.DB, item.productId, item.quantity);
+    if (!product) {
+      // Roll back reservations already made for earlier items in this order
+      await Promise.all(
+        reserved.map((r) => releaseInventory(env.DB, r.productId, r.quantity))
+      );
+      return NextResponse.json(
+        { error: `"${item.title}" is out of stock or has insufficient inventory.` },
+        { status: 409 }
+      );
+    }
+    reserved.push(item);
+  }
+
   const amountINR = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
   const amountPaise = amountINR * 100;
 
-  // Create Razorpay order via REST API (no SDK — Cloudflare Workers compatible)
+  // Create Razorpay order. If this fails, release all reservations.
   const credentials = btoa(`${keyId}:${keySecret}`);
   const rzpResponse = await fetch("https://api.razorpay.com/v1/orders", {
     method: "POST",
@@ -52,12 +72,14 @@ export async function POST(request: NextRequest) {
   if (!rzpResponse.ok) {
     const err = await rzpResponse.text();
     console.error("Razorpay create order failed:", err);
+    await Promise.all(
+      reserved.map((r) => releaseInventory(env.DB, r.productId, r.quantity))
+    );
     return NextResponse.json({ error: "Failed to create payment order" }, { status: 502 });
   }
 
   const rzpOrder = (await rzpResponse.json()) as { id: string };
 
-  const { env } = await getCloudflareContext({ async: true });
   await createOrder(env.DB, {
     razorpayOrderId: rzpOrder.id,
     customerName: customer.name,

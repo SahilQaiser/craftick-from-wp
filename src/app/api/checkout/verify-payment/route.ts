@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { updateOrderStatus, adjustInventory, updateProduct } from "@/lib/db";
+import { updateOrderStatus, getProductById, updateProduct } from "@/lib/db";
 import type { CartItem } from "@/contexts/CartContext";
 
 type RequestBody = {
@@ -63,12 +63,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Order not found" }, { status: 404 });
   }
 
-  // Decrement inventory for each purchased item; auto-mark out_of_stock if it hits 0
+  // Inventory was already decremented atomically in create-order.
+  // Just auto-mark products as out_of_stock if their inventory has reached 0.
   const cartItems: CartItem[] = items?.length ? items : order.items;
   await Promise.all(
     cartItems.map(async (item) => {
-      const updated = await adjustInventory(env.DB, item.productId, -item.quantity);
-      if (updated && updated.inventory === 0 && !updated.outOfStock) {
+      const product = await getProductById(env.DB, item.productId);
+      if (product && product.inventory === 0 && !product.outOfStock) {
         await updateProduct(env.DB, item.productId, { outOfStock: true });
       }
     })

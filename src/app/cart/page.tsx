@@ -109,7 +109,15 @@ export default function CartPage() {
           }
         },
         modal: {
-          ondismiss: () => setLoading(false),
+          ondismiss: () => {
+            // Release the reserved inventory so it becomes available again
+            fetch("/api/checkout/cancel-order", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ razorpayOrderId: order.razorpayOrderId }),
+            }).catch(() => {/* best-effort */});
+            setLoading(false);
+          },
         },
       });
 

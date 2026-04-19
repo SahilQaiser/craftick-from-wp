@@ -1,7 +1,7 @@
 import type { Product } from "./products-static";
 import type { CartItem } from "@/contexts/CartContext";
 
-export type OrderStatus = "pending" | "paid" | "failed";
+export type OrderStatus = "pending" | "paid" | "failed" | "cancelled";
 
 export type Order = {
   id: number;
@@ -256,6 +256,63 @@ export async function getOrderById(
   const row = await db
     .prepare("SELECT * FROM orders WHERE id = ?")
     .bind(id)
+    .first<OrderRow>();
+  return row ? rowToOrder(row) : undefined;
+}
+
+/**
+ * Atomically decrements inventory by `quantity` only if stock is available.
+ * Returns null (without throwing) if insufficient inventory — callers must handle this.
+ */
+export async function reserveInventory(
+  db: D1Database,
+  productId: number,
+  quantity: number
+): Promise<Product | null> {
+  const row = await db
+    .prepare(
+      `UPDATE products
+       SET inventory = inventory - ?, updated_at = datetime('now')
+       WHERE id = ? AND inventory >= ? AND out_of_stock = 0
+       RETURNING *`
+    )
+    .bind(quantity, productId, quantity)
+    .first<D1Row>();
+  return row ? rowToProduct(row) : null;
+}
+
+/**
+ * Restores inventory — used when a pending order is cancelled before payment.
+ */
+export async function releaseInventory(
+  db: D1Database,
+  productId: number,
+  quantity: number
+): Promise<void> {
+  await db
+    .prepare(
+      `UPDATE products
+       SET inventory = inventory + ?,
+           out_of_stock = CASE WHEN (inventory + ?) > 0 THEN 0 ELSE out_of_stock END,
+           updated_at = datetime('now')
+       WHERE id = ?`
+    )
+    .bind(quantity, quantity, productId)
+    .run();
+}
+
+export async function cancelOrder(
+  db: D1Database,
+  razorpayOrderId: string
+): Promise<Order | undefined> {
+  const row = await db
+    .prepare(
+      `UPDATE orders
+       SET status = 'cancelled', updated_at = datetime('now')
+       WHERE razorpay_order_id = ? AND status = 'pending'
+       RETURNING *`
+    )
+    .bind(razorpayOrderId)
     .first<OrderRow>();
   return row ? rowToOrder(row) : undefined;
 }
