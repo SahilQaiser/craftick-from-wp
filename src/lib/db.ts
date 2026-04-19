@@ -1,4 +1,51 @@
 import type { Product } from "./products-static";
+import type { CartItem } from "@/contexts/CartContext";
+
+export type OrderStatus = "pending" | "paid" | "failed";
+
+export type Order = {
+  id: number;
+  razorpayOrderId: string;
+  razorpayPaymentId: string | null;
+  customerName: string;
+  customerEmail: string;
+  customerPhone: string;
+  customerAddress: string;
+  items: CartItem[];
+  amount: number;
+  status: OrderStatus;
+  createdAt: string;
+};
+
+type OrderRow = {
+  id: number;
+  razorpay_order_id: string;
+  razorpay_payment_id: string | null;
+  customer_name: string;
+  customer_email: string;
+  customer_phone: string;
+  customer_address: string;
+  items: string;
+  amount: number;
+  status: string;
+  created_at: string;
+};
+
+function rowToOrder(row: OrderRow): Order {
+  return {
+    id: row.id,
+    razorpayOrderId: row.razorpay_order_id,
+    razorpayPaymentId: row.razorpay_payment_id,
+    customerName: row.customer_name,
+    customerEmail: row.customer_email,
+    customerPhone: row.customer_phone,
+    customerAddress: row.customer_address,
+    items: JSON.parse(row.items) as CartItem[],
+    amount: row.amount,
+    status: row.status as OrderStatus,
+    createdAt: row.created_at,
+  };
+}
 
 type D1Row = {
   id: number;
@@ -143,6 +190,74 @@ export async function deleteProduct(db: D1Database, id: number): Promise<boolean
     .bind(id)
     .run();
   return (result.meta?.changes ?? 0) > 0;
+}
+
+export async function getOrders(db: D1Database): Promise<Order[]> {
+  const result = await db
+    .prepare("SELECT * FROM orders ORDER BY created_at DESC")
+    .all<OrderRow>();
+  return (result.results ?? []).map(rowToOrder);
+}
+
+export async function createOrder(
+  db: D1Database,
+  data: {
+    razorpayOrderId: string;
+    customerName: string;
+    customerEmail: string;
+    customerPhone: string;
+    customerAddress: string;
+    items: CartItem[];
+    amount: number;
+  }
+): Promise<Order> {
+  const row = await db
+    .prepare(
+      `INSERT INTO orders (razorpay_order_id, customer_name, customer_email, customer_phone, customer_address, items, amount)
+       VALUES (?, ?, ?, ?, ?, ?, ?)
+       RETURNING *`
+    )
+    .bind(
+      data.razorpayOrderId,
+      data.customerName,
+      data.customerEmail,
+      data.customerPhone,
+      data.customerAddress,
+      JSON.stringify(data.items),
+      data.amount
+    )
+    .first<OrderRow>();
+  if (!row) throw new Error("Failed to create order");
+  return rowToOrder(row);
+}
+
+export async function updateOrderStatus(
+  db: D1Database,
+  razorpayOrderId: string,
+  status: OrderStatus,
+  razorpayPaymentId?: string
+): Promise<Order | undefined> {
+  const row = await db
+    .prepare(
+      `UPDATE orders
+       SET status = ?, razorpay_payment_id = COALESCE(?, razorpay_payment_id), updated_at = datetime('now')
+       WHERE razorpay_order_id = ?
+       RETURNING *`
+    )
+    .bind(status, razorpayPaymentId ?? null, razorpayOrderId)
+    .first<OrderRow>();
+  return row ? rowToOrder(row) : undefined;
+}
+
+export async function getOrderById(
+  db: D1Database,
+  id: number
+): Promise<Order | undefined> {
+  const row = await db
+    .prepare("SELECT * FROM orders WHERE id = ?")
+    .bind(id)
+    .first<OrderRow>();
+  return row ? rowToOrder(row) : undefined;
 }
 
 export async function adjustInventory(
