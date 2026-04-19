@@ -41,7 +41,7 @@ async function ShopContent({ categorySlug, query }: { categorySlug?: string; que
   return (
     <div className="min-h-screen bg-[#F8F5F0]">
       {/* Page header */}
-      <div className="bg-white border-b border-[#E8E3DC] pt-24 pb-10">
+      <div className="bg-white border-b border-[#E8E3DC] pt-32 pb-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <p className="text-[#B5903A] text-[10px] tracking-[0.35em] uppercase font-medium font-[family-name:var(--font-body)] mb-3">
             {activeCategory ? "Category" : "All Products"}

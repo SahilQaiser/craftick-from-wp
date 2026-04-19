@@ -40,7 +40,7 @@ export default async function Home() {
       <Header />
       <main>
         {/* Hero Section */}
-        <section className="relative min-h-screen flex items-end pb-16 md:pb-24 pt-20 overflow-hidden bg-[#2C2420]">
+        <section className="relative min-h-screen flex items-end pb-16 md:pb-24 pt-32 overflow-hidden bg-[#2C2420]">
           {/* Background image */}
           <div className="absolute inset-0">
             <Image

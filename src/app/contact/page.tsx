@@ -12,7 +12,7 @@ export default function ContactPage() {
     <>
       <Header />
       <main className="min-h-screen bg-[#F8F5F0]">
-        <div className="pt-28 pb-20 px-4 sm:px-6">
+        <div className="pt-36 pb-20 px-4 sm:px-6">
           <div className="max-w-2xl mx-auto">
             <p className="text-[#B5903A] text-[10px] tracking-[0.35em] uppercase font-medium font-[family-name:var(--font-body)] mb-3">
               Get in Touch
