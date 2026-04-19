@@ -36,13 +36,15 @@ export async function PUT(
   if (!body) return NextResponse.json({ error: "Invalid body" }, { status: 400 });
 
   const { env } = await getCloudflareContext({ async: true });
+  const images = Array.isArray(body.images) ? (body.images as string[]).map(String) : undefined;
   const product = await updateProduct(env.DB, Number(id), {
     slug: body.slug !== undefined ? String(body.slug).trim() : undefined,
     title: body.title !== undefined ? String(body.title).trim() : undefined,
     subtitle: body.subtitle !== undefined ? String(body.subtitle).trim() : undefined,
     description: body.description !== undefined ? String(body.description).trim() : undefined,
     price: body.price !== undefined ? Number(body.price) : undefined,
-    image: body.image !== undefined ? String(body.image).trim() : undefined,
+    images,
+    image: images === undefined && body.image !== undefined ? String(body.image).trim() : undefined,
     category: body.category !== undefined ? String(body.category).trim() : undefined,
     featured: body.featured !== undefined ? Boolean(body.featured) : undefined,
     outOfStock: body.outOfStock !== undefined ? Boolean(body.outOfStock) : undefined,
