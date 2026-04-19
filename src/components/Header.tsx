@@ -11,6 +11,7 @@ const navLinks = [
   { label: "Sarees", href: "/shop?category=sarees" },
   { label: "All Products", href: "/shop" },
   { label: "About", href: "/about" },
+  { label: "Track Order", href: "/track" },
 ];
 
 export default function Header() {
@@ -60,7 +61,7 @@ export default function Header() {
             <div className="hidden md:flex flex-1 items-center justify-between">
               {/* Left Nav */}
               <nav className="flex items-center gap-10 lg:gap-14 flex-1 justify-end pr-16 lg:pr-24">
-                {navLinks.slice(0, 2).map((link) => (
+                {navLinks.slice(0, 3).map((link) => (
                   <Link
                     key={link.href}
                     href={link.href}
@@ -85,7 +86,7 @@ export default function Header() {
 
               {/* Right Nav */}
               <nav className="flex items-center gap-10 lg:gap-14 flex-1 pl-16 lg:pl-24">
-                {navLinks.slice(2, 4).map((link) => (
+                {navLinks.slice(3, 6).map((link) => (
                   <Link
                     key={link.href}
                     href={link.href}

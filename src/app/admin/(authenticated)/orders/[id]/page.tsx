@@ -34,12 +34,12 @@ export default async function AdminOrderDetailPage({ params }: Props) {
       <div className="flex items-center gap-2 text-xs text-[#8C8680] mb-6">
         <Link href="/admin/orders" className="hover:text-[#B5903A] transition-colors">Orders</Link>
         <span>/</span>
-        <span className="text-[#1C1C1C] font-medium">Order #{order.id}</span>
+        <span className="text-[#1C1C1C] font-medium">Order {order.orderNumber}</span>
       </div>
 
       <div className="flex items-start justify-between mb-8 gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-semibold text-[#1C1C1C]">Order #{order.id}</h1>
+          <h1 className="text-2xl font-semibold text-[#1C1C1C]">Order {order.orderNumber}</h1>
           <p className="text-sm text-[#6B6560] mt-1">
             {new Date(order.createdAt).toLocaleDateString("en-IN", {
               day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit",

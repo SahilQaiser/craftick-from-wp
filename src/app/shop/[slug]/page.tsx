@@ -44,7 +44,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
       <Header />
       <main className="min-h-screen bg-[#F8F5F0]">
         {/* Breadcrumb */}
-        <div className="pt-24 pb-4 bg-white border-b border-[#E8E3DC]">
+        <div className="pt-36 pb-4 bg-white border-b border-[#E8E3DC]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <nav className="flex items-center gap-2 text-xs text-[#8C8680] font-[family-name:var(--font-body)]">
               <Link href="/" className="hover:text-[#B5903A] transition-colors">

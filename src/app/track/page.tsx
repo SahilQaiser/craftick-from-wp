@@ -21,13 +21,10 @@ export default async function TrackPage({ searchParams }: Props) {
   let notFound = false;
 
   if (email && orderIdStr) {
-    const orderId = parseInt(orderIdStr, 10);
-    if (!isNaN(orderId)) {
-      const { env } = await getCloudflareContext({ async: true });
-      const order = await searchOrder(env.DB, orderId, email);
-      if (order) {
-        redirect(`/track/${order.razorpayOrderId}`);
-      }
+    const { env } = await getCloudflareContext({ async: true });
+    const order = await searchOrder(env.DB, orderIdStr, email);
+    if (order) {
+      redirect(`/track/${order.razorpayOrderId}`);
     }
     notFound = true;
   }
@@ -36,7 +33,7 @@ export default async function TrackPage({ searchParams }: Props) {
     <>
       <Header />
       <main className="min-h-screen bg-[#F8F5F0]">
-        <div className="pt-24 pb-4 bg-white border-b border-[#E8E3DC]">
+        <div className="pt-36 pb-4 bg-white border-b border-[#E8E3DC]">
           <div className="max-w-3xl mx-auto px-4 sm:px-6">
             <nav className="flex items-center gap-2 text-xs text-[#8C8680] font-[family-name:var(--font-body)]">
               <Link href="/" className="hover:text-[#B5903A] transition-colors">Home</Link>
@@ -61,12 +58,11 @@ export default async function TrackPage({ searchParams }: Props) {
                   Order Number
                 </label>
                 <input
-                  type="number"
+                  type="text"
                   name="order"
                   defaultValue={orderIdStr}
                   required
-                  min={1}
-                  placeholder="e.g. 42"
+                  placeholder="e.g. CRFTK_A1B2C3D4E5"
                   className="w-full border border-[#E8E3DC] px-3 py-2.5 text-sm text-[#1C1C1C] bg-[#F8F5F0] focus:outline-none focus:border-[#B5903A] transition-colors font-[family-name:var(--font-body)]"
                 />
               </div>

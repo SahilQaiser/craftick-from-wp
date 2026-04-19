@@ -75,5 +75,5 @@ export async function POST(request: NextRequest) {
     })
   );
 
-  return NextResponse.json({ success: true, orderId: order.id, razorpayOrderId: order.razorpayOrderId });
+  return NextResponse.json({ success: true, orderId: order.orderNumber, razorpayOrderId: order.razorpayOrderId });
 }

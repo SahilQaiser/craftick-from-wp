@@ -49,14 +49,14 @@ export default async function TrackDetailPage({ params }: Props) {
     <>
       <Header />
       <main className="min-h-screen bg-[#F8F5F0]">
-        <div className="pt-24 pb-4 bg-white border-b border-[#E8E3DC]">
+        <div className="pt-36 pb-4 bg-white border-b border-[#E8E3DC]">
           <div className="max-w-3xl mx-auto px-4 sm:px-6">
             <nav className="flex items-center gap-2 text-xs text-[#8C8680] font-[family-name:var(--font-body)]">
               <Link href="/" className="hover:text-[#B5903A] transition-colors">Home</Link>
               <span>/</span>
               <Link href="/track" className="hover:text-[#B5903A] transition-colors">Track Order</Link>
               <span>/</span>
-              <span className="text-[#4A4440]">Order #{order.id}</span>
+              <span className="text-[#4A4440]">Order {order.orderNumber}</span>
             </nav>
           </div>
         </div>
@@ -65,7 +65,7 @@ export default async function TrackDetailPage({ params }: Props) {
           {/* Header */}
           <div className="mb-8">
             <p className="text-[10px] tracking-widest uppercase text-[#B5903A] font-medium font-[family-name:var(--font-body)] mb-2">
-              Order #{order.id}
+              Order {order.orderNumber}
             </p>
             <h1 className="font-[family-name:var(--font-heading)] text-3xl md:text-4xl text-[#1C1C1C] font-light mb-1">
               Order Status

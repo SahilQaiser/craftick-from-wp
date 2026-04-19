@@ -13,6 +13,7 @@ export type OrderStatus =
 
 export type Order = {
   id: number;
+  orderNumber: string;
   razorpayOrderId: string;
   razorpayPaymentId: string | null;
   customerName: string;
@@ -31,6 +32,7 @@ export type Order = {
 
 type OrderRow = {
   id: number;
+  order_number: string;
   razorpay_order_id: string;
   razorpay_payment_id: string | null;
   customer_name: string;
@@ -50,6 +52,7 @@ type OrderRow = {
 function rowToOrder(row: OrderRow): Order {
   return {
     id: row.id,
+    orderNumber: row.order_number || `#${row.id}`,
     razorpayOrderId: row.razorpay_order_id,
     razorpayPaymentId: row.razorpay_payment_id,
     customerName: row.customer_name,
@@ -225,12 +228,12 @@ export async function getOrderByRazorpayId(
 
 export async function searchOrder(
   db: D1Database,
-  orderId: number,
+  orderNumber: string,
   email: string
 ): Promise<Order | undefined> {
   const row = await db
-    .prepare("SELECT * FROM orders WHERE id = ? AND customer_email = ?")
-    .bind(orderId, email.toLowerCase().trim())
+    .prepare("SELECT * FROM orders WHERE (order_number = ? OR CAST(id AS TEXT) = ?) AND customer_email = ?")
+    .bind(orderNumber, orderNumber, email.toLowerCase().trim())
     .first<OrderRow>();
   return row ? rowToOrder(row) : undefined;
 }
@@ -268,6 +271,15 @@ export async function getOrders(db: D1Database): Promise<Order[]> {
   return (result.results ?? []).map(rowToOrder);
 }
 
+function generateOrderNumber(): string {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // Readable alphanumeric
+  let result = "";
+  for (let i = 0; i < 10; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return `CRFTK_${result}`;
+}
+
 export async function createOrder(
   db: D1Database,
   data: {
@@ -280,13 +292,15 @@ export async function createOrder(
     amount: number;
   }
 ): Promise<Order> {
+  const orderNumber = generateOrderNumber();
   const row = await db
     .prepare(
-      `INSERT INTO orders (razorpay_order_id, customer_name, customer_email, customer_phone, customer_address, items, amount)
-       VALUES (?, ?, ?, ?, ?, ?, ?)
+      `INSERT INTO orders (order_number, razorpay_order_id, customer_name, customer_email, customer_phone, customer_address, items, amount)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
        RETURNING *`
     )
     .bind(
+      orderNumber,
       data.razorpayOrderId,
       data.customerName,
       data.customerEmail,

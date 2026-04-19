@@ -16,7 +16,7 @@ export default async function OrderSuccessPage({ searchParams }: Props) {
   return (
     <>
       <Header />
-      <main className="min-h-screen bg-[#F8F5F0] flex items-center justify-center">
+      <main className="min-h-screen bg-[#F8F5F0] flex items-center justify-center pt-16">
         <div className="max-w-lg mx-auto px-4 py-24 text-center">
           <div className="text-[#B5903A] text-5xl mb-6">✦</div>
           <h1 className="font-[family-name:var(--font-heading)] text-4xl md:text-5xl text-[#1C1C1C] font-light mb-4">
@@ -27,7 +27,7 @@ export default async function OrderSuccessPage({ searchParams }: Props) {
           </p>
           {id && (
             <p className="text-sm text-[#6B6560] font-[family-name:var(--font-body)] mb-1">
-              Order <span className="font-semibold text-[#1C1C1C]">#{id}</span>
+              Order <span className="font-semibold text-[#1C1C1C]">{id}</span>
             </p>
           )}
           <p className="text-sm text-[#6B6560] font-[family-name:var(--font-body)] leading-relaxed mb-10">
