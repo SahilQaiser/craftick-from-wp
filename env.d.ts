@@ -4,6 +4,11 @@
 declare namespace Cloudflare {
 	interface Env {
 		ASSETS: Fetcher;
+		DB: D1Database;
+		PRODUCT_IMAGES: R2Bucket;
+		ADMIN_USERNAME: string;
+		ADMIN_PASSWORD: string;
+		AUTH_SECRET: string;
 	}
 }
 interface CloudflareEnv extends Cloudflare.Env {}

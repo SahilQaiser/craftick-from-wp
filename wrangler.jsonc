@@ -7,7 +7,10 @@
 	"name": "craftick-from-wp",
 	"main": ".open-next/worker.js",
 	"compatibility_date": "2025-10-08",
-	"compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+	"compatibility_flags": [
+		"nodejs_compat",
+		"global_fetch_strictly_public"
+	],
 	"assets": {
 		"binding": "ASSETS",
 		"directory": ".open-next/assets"
@@ -15,5 +18,21 @@
 	"observability": {
 		"enabled": true
 	},
-	"upload_source_maps": true
+	"upload_source_maps": true,
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "craftick-db",
+			"database_id": "ef4dafd5-836a-40fa-8a4f-9a9802381466"
+		}
+	],
+	"r2_buckets": [
+		{
+			"binding": "PRODUCT_IMAGES",
+			"bucket_name": "craftick-product-images"
+		}
+	],
+	"vars": {
+		"ADMIN_USERNAME": "admin"
+	}
 }
