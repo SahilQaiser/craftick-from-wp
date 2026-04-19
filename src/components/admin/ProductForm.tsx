@@ -14,6 +14,7 @@ export default function ProductForm({ product }: Props) {
   const router = useRouter();
   const isEdit = !!product;
   const fileRef = useRef<HTMLInputElement>(null);
+  const urlRef = useRef<HTMLInputElement>(null);
 
   const [form, setForm] = useState({
     title: product?.title ?? "",
@@ -25,7 +26,11 @@ export default function ProductForm({ product }: Props) {
     featured: product?.featured ?? false,
     outOfStock: product?.outOfStock ?? false,
     inventory: product?.inventory?.toString() ?? "0",
-    image: product?.image ?? "",
+    images: product?.images?.length
+      ? product.images
+      : product?.image
+        ? [product.image]
+        : [] as string[],
   });
 
   const [uploading, setUploading] = useState(false);
@@ -74,13 +79,29 @@ export default function ProductForm({ product }: Props) {
         return;
       }
       const data = await res.json() as { url?: string };
-      setForm((prev) => ({ ...prev, image: data.url ?? "" }));
+      if (data.url) {
+        setForm((prev) => ({ ...prev, images: [...prev.images, data.url!] }));
+      }
     } catch {
       setError("Upload failed");
     } finally {
       setUploading(false);
       if (fileRef.current) fileRef.current.value = "";
     }
+  }
+
+  function handleAddUrl() {
+    const url = urlRef.current?.value.trim();
+    if (!url) return;
+    setForm((prev) => ({ ...prev, images: [...prev.images, url] }));
+    if (urlRef.current) urlRef.current.value = "";
+  }
+
+  function removeImage(index: number) {
+    setForm((prev) => ({
+      ...prev,
+      images: prev.images.filter((_, i) => i !== index),
+    }));
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -92,6 +113,8 @@ export default function ProductForm({ product }: Props) {
       ...form,
       price: Number(form.price),
       inventory: Number(form.inventory),
+      images: form.images,
+      image: form.images[0] ?? "",
     };
 
     try {
@@ -261,51 +284,85 @@ export default function ProductForm({ product }: Props) {
         </div>
       </div>
 
-      {/* Image */}
+      {/* Images */}
       <div>
         <label className="block text-xs font-semibold text-[#4A4440] mb-2 uppercase tracking-wide">
-          Product Image
-        </label>
-        <div className="flex items-start gap-5">
-          {form.image && (
-            <div className="relative w-24 h-32 shrink-0 overflow-hidden bg-[#EDE8E1]">
-              <Image
-                src={form.image}
-                alt="Product preview"
-                fill
-                className="object-cover object-top"
-                sizes="96px"
-              />
-            </div>
+          Product Images
+          {form.images.length > 0 && (
+            <span className="ml-2 text-[#8C8680] normal-case font-normal">
+              ({form.images.length} image{form.images.length !== 1 ? "s" : ""} · first is primary)
+            </span>
           )}
-          <div className="flex-1 space-y-3">
-            <div className="border-2 border-dashed border-[#E8E3DC] p-4 text-center">
+        </label>
+
+        {/* Existing images */}
+        {form.images.length > 0 && (
+          <div className="flex flex-wrap gap-3 mb-4">
+            {form.images.map((src, i) => (
+              <div key={i} className="relative group">
+                <div className="relative w-24 h-32 overflow-hidden bg-[#EDE8E1]">
+                  <Image
+                    src={src}
+                    alt={`Image ${i + 1}`}
+                    fill
+                    className="object-cover object-top"
+                    sizes="96px"
+                  />
+                  {i === 0 && (
+                    <div className="absolute bottom-0 left-0 right-0 bg-[#B5903A] text-white text-[9px] text-center py-0.5 tracking-wider uppercase">
+                      Primary
+                    </div>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => removeImage(i)}
+                  className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-[#1C1C1C] text-white text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                  title="Remove image"
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Upload + URL add */}
+        <div className="space-y-3">
+          <div className="border-2 border-dashed border-[#E8E3DC] p-4 text-center">
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              onChange={handleImageUpload}
+              disabled={uploading}
+              className="hidden"
+              id="image-upload"
+            />
+            <label
+              htmlFor="image-upload"
+              className="cursor-pointer text-sm text-[#6B6560] hover:text-[#B5903A] transition-colors"
+            >
+              {uploading ? "Uploading…" : "Click to upload image (JPEG, PNG, WebP · max 10 MB)"}
+            </label>
+          </div>
+          <div>
+            <p className="text-[10px] text-[#8C8680] mb-1">Or add an image URL:</p>
+            <div className="flex gap-2">
               <input
-                ref={fileRef}
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-                onChange={handleImageUpload}
-                disabled={uploading}
-                className="hidden"
-                id="image-upload"
-              />
-              <label
-                htmlFor="image-upload"
-                className="cursor-pointer text-sm text-[#6B6560] hover:text-[#B5903A] transition-colors"
-              >
-                {uploading ? "Uploading…" : "Click to upload image (JPEG, PNG, WebP · max 10 MB)"}
-              </label>
-            </div>
-            <div>
-              <p className="text-[10px] text-[#8C8680] mb-1">Or paste an image URL:</p>
-              <input
-                name="image"
+                ref={urlRef}
                 type="text"
-                value={form.image}
-                onChange={handleChange}
                 placeholder="/images/products/filename.jpg"
-                className="w-full border border-[#E8E3DC] px-3 py-2 text-xs font-mono text-[#1C1C1C] focus:outline-none focus:border-[#B5903A] bg-white transition-colors"
+                className="flex-1 border border-[#E8E3DC] px-3 py-2 text-xs font-mono text-[#1C1C1C] focus:outline-none focus:border-[#B5903A] bg-white transition-colors"
+                onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleAddUrl())}
               />
+              <button
+                type="button"
+                onClick={handleAddUrl}
+                className="border border-[#E8E3DC] text-[#4A4440] text-xs px-4 py-2 hover:border-[#1C1C1C] transition-colors"
+              >
+                Add
+              </button>
             </div>
           </div>
         </div>

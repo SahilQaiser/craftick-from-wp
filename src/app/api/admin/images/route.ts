@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
   const key = `products/${Date.now()}-${sanitizeFilename(file.name.replace(/\.[^.]+$/, ""))}.${ext}`;
 
   const { env } = await getCloudflareContext({ async: true });
-  await env.PRODUCT_IMAGES.put(key, file.stream(), {
+  await env.PRODUCT_IMAGES.put(key, await file.arrayBuffer(), {
     httpMetadata: { contentType: file.type },
   });
 

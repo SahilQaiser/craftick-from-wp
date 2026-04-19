@@ -35,13 +35,15 @@ export async function POST(request: NextRequest) {
 
   const { env } = await getCloudflareContext({ async: true });
   try {
+    const images = Array.isArray(body.images) ? (body.images as string[]).map(String) : undefined;
     const product = await createProduct(env.DB, {
       slug: String(body.slug).trim(),
       title: String(body.title).trim(),
       subtitle: String(body.subtitle ?? "").trim(),
       description: String(body.description ?? "").trim(),
       price: Number(body.price),
-      image: String(body.image ?? "").trim(),
+      image: images?.[0] ?? String(body.image ?? "").trim(),
+      images,
       category: String(body.category ?? "").trim(),
       featured: Boolean(body.featured),
       outOfStock: Boolean(body.outOfStock),

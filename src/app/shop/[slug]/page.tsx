@@ -1,10 +1,10 @@
 import { notFound } from "next/navigation";
-import Image from "next/image";
 import Link from "next/link";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
+import ProductImageGallery from "@/components/ProductImageGallery";
 import { getProductBySlug, getProductsByCategory } from "@/lib/db";
 import { categories } from "@/lib/categories";
 import { formatPrice } from "@/lib/products-static";
@@ -74,24 +74,12 @@ export default async function ProductPage({ params }: ProductPageProps) {
         {/* Product detail */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
-            {/* Image */}
-            <div className="relative aspect-[3/4] overflow-hidden bg-[#EDE8E1]">
-              <Image
-                src={product.image}
-                alt={product.title}
-                fill
-                className="object-cover object-top"
-                sizes="(max-width: 1024px) 100vw, 50vw"
-                priority
-              />
-              {product.featured && (
-                <div className="absolute top-4 left-4">
-                  <span className="bg-[#B5903A] text-white text-[10px] tracking-widest uppercase px-3 py-1.5 font-medium">
-                    Featured
-                  </span>
-                </div>
-              )}
-            </div>
+            {/* Images gallery */}
+            <ProductImageGallery
+              images={product.images?.length ? product.images : product.image ? [product.image] : []}
+              title={product.title}
+              featured={product.featured}
+            />
 
             {/* Info */}
             <div className="flex flex-col justify-start lg:py-4">

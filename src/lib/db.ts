@@ -78,6 +78,7 @@ type D1Row = {
   description: string;
   price: number;
   image: string;
+  images: string;
   category: string;
   featured: number;
   out_of_stock: number;
@@ -87,6 +88,7 @@ type D1Row = {
 };
 
 function rowToProduct(row: D1Row): Product {
+  const images = JSON.parse(row.images || "[]") as string[];
   return {
     id: row.id,
     slug: row.slug,
@@ -94,7 +96,8 @@ function rowToProduct(row: D1Row): Product {
     subtitle: row.subtitle,
     description: row.description,
     price: row.price,
-    image: row.image,
+    image: images[0] || row.image,
+    images,
     category: row.category,
     featured: row.featured === 1,
     outOfStock: row.out_of_stock === 1,
@@ -153,10 +156,12 @@ export async function createProduct(
   db: D1Database,
   data: Omit<Product, "id">
 ): Promise<Product> {
+  const images = data.images ?? (data.image ? [data.image] : []);
+  const image = images[0] ?? data.image ?? "";
   const result = await db
     .prepare(
-      `INSERT INTO products (slug, title, subtitle, description, price, image, category, featured, out_of_stock, inventory)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `INSERT INTO products (slug, title, subtitle, description, price, image, images, category, featured, out_of_stock, inventory)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
        RETURNING *`
     )
     .bind(
@@ -165,7 +170,8 @@ export async function createProduct(
       data.subtitle,
       data.description,
       data.price,
-      data.image,
+      image,
+      JSON.stringify(images),
       data.category,
       data.featured ? 1 : 0,
       data.outOfStock ? 1 : 0,
@@ -189,7 +195,13 @@ export async function updateProduct(
   if (data.subtitle !== undefined) { sets.push("subtitle = ?"); values.push(data.subtitle); }
   if (data.description !== undefined) { sets.push("description = ?"); values.push(data.description); }
   if (data.price !== undefined) { sets.push("price = ?"); values.push(data.price); }
-  if (data.image !== undefined) { sets.push("image = ?"); values.push(data.image); }
+  if (data.images !== undefined) {
+    const image = data.images[0] ?? "";
+    sets.push("images = ?"); values.push(JSON.stringify(data.images));
+    sets.push("image = ?"); values.push(image);
+  } else if (data.image !== undefined) {
+    sets.push("image = ?"); values.push(data.image);
+  }
   if (data.category !== undefined) { sets.push("category = ?"); values.push(data.category); }
   if (data.featured !== undefined) { sets.push("featured = ?"); values.push(data.featured ? 1 : 0); }
   if (data.outOfStock !== undefined) { sets.push("out_of_stock = ?"); values.push(data.outOfStock ? 1 : 0); }
