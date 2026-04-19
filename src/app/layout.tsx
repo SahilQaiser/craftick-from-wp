@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Jost } from "next/font/google";
 import "./globals.css";
+import { CartProvider } from "@/contexts/CartContext";
+import CartToast from "@/components/CartToast";
 
 const cormorant = Cormorant_Garamond({
   variable: "--font-heading",
@@ -46,7 +48,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${cormorant.variable} ${jost.variable}`}>
-      <body className="antialiased">{children}</body>
+      <body className="antialiased">
+        <CartProvider>
+          {children}
+          <CartToast />
+        </CartProvider>
+      </body>
     </html>
   );
 }

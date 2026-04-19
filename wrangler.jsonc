@@ -33,6 +33,13 @@
 		}
 	],
 	"vars": {
-		"ADMIN_USERNAME": "admin"
+		"ADMIN_USERNAME": "admin",
+		// Add your Razorpay test key ID here (public — safe to commit)
+		// Get it from https://dashboard.razorpay.com/app/keys
+		"RAZORPAY_KEY_ID": "rzp_test_SfLY1M0ZKWHJbT"
+		// RAZORPAY_KEY_SECRET must be set as a Wrangler secret (never commit it):
+		//   wrangler secret put RAZORPAY_KEY_SECRET
+		// For local dev, add to .dev.vars:
+		//   RAZORPAY_KEY_SECRET=your_secret_here
 	}
 }

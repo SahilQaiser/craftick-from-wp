@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
+import { useCart } from "@/contexts/CartContext";
 
 const navLinks = [
   { label: "Pashmina Shawls", href: "/shop?category=pashmina-shawls" },
@@ -10,10 +11,12 @@ const navLinks = [
   { label: "Sarees", href: "/shop?category=sarees" },
   { label: "All Products", href: "/shop" },
   { label: "About", href: "/about" },
+  { label: "Track Order", href: "/track" },
 ];
 
 export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { totalItems } = useCart();
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 transition-all duration-300">
@@ -58,7 +61,7 @@ export default function Header() {
             <div className="hidden md:flex flex-1 items-center justify-between">
               {/* Left Nav */}
               <nav className="flex items-center gap-10 lg:gap-14 flex-1 justify-end pr-16 lg:pr-24">
-                {navLinks.slice(0, 2).map((link) => (
+                {navLinks.slice(0, 3).map((link) => (
                   <Link
                     key={link.href}
                     href={link.href}
@@ -83,7 +86,7 @@ export default function Header() {
 
               {/* Right Nav */}
               <nav className="flex items-center gap-10 lg:gap-14 flex-1 pl-16 lg:pl-24">
-                {navLinks.slice(2, 4).map((link) => (
+                {navLinks.slice(3, 6).map((link) => (
                   <Link
                     key={link.href}
                     href={link.href}
@@ -134,6 +137,30 @@ export default function Header() {
                     d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
                   />
                 </svg>
+              </Link>
+              <Link
+                href="/cart"
+                aria-label="Cart"
+                className="relative p-2 text-[#1C1C1C] hover:text-[#B5903A] transition-colors"
+              >
+                <svg
+                  className="w-[22px] h-[22px]"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1.2}
+                    d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+                  />
+                </svg>
+                {totalItems > 0 && (
+                  <span className="absolute top-0.5 right-0.5 min-w-[18px] h-[18px] bg-[#B5903A] text-white text-[10px] font-medium rounded-full flex items-center justify-center px-1 font-[family-name:var(--font-body)]">
+                    {totalItems > 99 ? "99+" : totalItems}
+                  </span>
+                )}
               </Link>
             </div>
           </div>

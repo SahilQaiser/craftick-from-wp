@@ -8,6 +8,7 @@ import ProductCard from "@/components/ProductCard";
 import { getProductBySlug, getProductsByCategory } from "@/lib/db";
 import { categories } from "@/lib/categories";
 import { formatPrice } from "@/lib/products-static";
+import AddToCartButton from "@/components/AddToCartButton";
 
 export const dynamic = "force-dynamic";
 
@@ -43,7 +44,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
       <Header />
       <main className="min-h-screen bg-[#F8F5F0]">
         {/* Breadcrumb */}
-        <div className="pt-24 pb-4 bg-white border-b border-[#E8E3DC]">
+        <div className="pt-36 pb-4 bg-white border-b border-[#E8E3DC]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <nav className="flex items-center gap-2 text-xs text-[#8C8680] font-[family-name:var(--font-body)]">
               <Link href="/" className="hover:text-[#B5903A] transition-colors">
@@ -146,12 +147,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
               {/* CTA */}
               <div className="flex flex-col sm:flex-row gap-3">
-                <Link
-                  href="/contact"
-                  className="flex-1 bg-[#1C1C1C] text-white text-xs tracking-widest uppercase px-8 py-4 font-medium hover:bg-[#B5903A] transition-colors text-center font-[family-name:var(--font-body)]"
-                >
-                  Enquire About This Piece
-                </Link>
+                <AddToCartButton product={product} />
                 <Link
                   href="/shop"
                   className="flex-1 border border-[#E8E3DC] text-[#4A4440] text-xs tracking-widest uppercase px-8 py-4 font-medium hover:border-[#1C1C1C] hover:text-[#1C1C1C] transition-colors text-center font-[family-name:var(--font-body)]"

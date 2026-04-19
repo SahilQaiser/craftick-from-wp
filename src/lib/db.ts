@@ -1,4 +1,74 @@
 import type { Product } from "./products-static";
+import type { CartItem } from "@/contexts/CartContext";
+
+export type OrderStatus =
+  | "pending"
+  | "paid"
+  | "processing"
+  | "shipped"
+  | "delivered"
+  | "cancelled"
+  | "refunded"
+  | "failed";
+
+export type Order = {
+  id: number;
+  orderNumber: string;
+  razorpayOrderId: string;
+  razorpayPaymentId: string | null;
+  customerName: string;
+  customerEmail: string;
+  customerPhone: string;
+  customerAddress: string;
+  items: CartItem[];
+  amount: number;
+  status: OrderStatus;
+  trackingNumber: string | null;
+  trackingUrl: string | null;
+  adminNotes: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+type OrderRow = {
+  id: number;
+  order_number: string;
+  razorpay_order_id: string;
+  razorpay_payment_id: string | null;
+  customer_name: string;
+  customer_email: string;
+  customer_phone: string;
+  customer_address: string;
+  items: string;
+  amount: number;
+  status: string;
+  tracking_number: string | null;
+  tracking_url: string | null;
+  admin_notes: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+function rowToOrder(row: OrderRow): Order {
+  return {
+    id: row.id,
+    orderNumber: row.order_number || `#${row.id}`,
+    razorpayOrderId: row.razorpay_order_id,
+    razorpayPaymentId: row.razorpay_payment_id,
+    customerName: row.customer_name,
+    customerEmail: row.customer_email,
+    customerPhone: row.customer_phone,
+    customerAddress: row.customer_address,
+    items: JSON.parse(row.items) as CartItem[],
+    amount: row.amount,
+    status: row.status as OrderStatus,
+    trackingNumber: row.tracking_number ?? null,
+    trackingUrl: row.tracking_url ?? null,
+    adminNotes: row.admin_notes ?? null,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
 
 type D1Row = {
   id: number;
@@ -143,6 +213,191 @@ export async function deleteProduct(db: D1Database, id: number): Promise<boolean
     .bind(id)
     .run();
   return (result.meta?.changes ?? 0) > 0;
+}
+
+export async function getOrderByRazorpayId(
+  db: D1Database,
+  razorpayOrderId: string
+): Promise<Order | undefined> {
+  const row = await db
+    .prepare("SELECT * FROM orders WHERE razorpay_order_id = ?")
+    .bind(razorpayOrderId)
+    .first<OrderRow>();
+  return row ? rowToOrder(row) : undefined;
+}
+
+export async function searchOrder(
+  db: D1Database,
+  orderNumber: string,
+  email: string
+): Promise<Order | undefined> {
+  const row = await db
+    .prepare("SELECT * FROM orders WHERE (order_number = ? OR CAST(id AS TEXT) = ?) AND customer_email = ?")
+    .bind(orderNumber, orderNumber, email.toLowerCase().trim())
+    .first<OrderRow>();
+  return row ? rowToOrder(row) : undefined;
+}
+
+export async function adminUpdateOrder(
+  db: D1Database,
+  id: number,
+  data: {
+    status?: OrderStatus;
+    trackingNumber?: string | null;
+    trackingUrl?: string | null;
+    adminNotes?: string | null;
+  }
+): Promise<Order | undefined> {
+  const sets: string[] = ["updated_at = datetime('now')"];
+  const values: (string | number | null)[] = [];
+
+  if (data.status !== undefined) { sets.push("status = ?"); values.push(data.status); }
+  if (data.trackingNumber !== undefined) { sets.push("tracking_number = ?"); values.push(data.trackingNumber); }
+  if (data.trackingUrl !== undefined) { sets.push("tracking_url = ?"); values.push(data.trackingUrl); }
+  if (data.adminNotes !== undefined) { sets.push("admin_notes = ?"); values.push(data.adminNotes); }
+
+  values.push(id);
+  const row = await db
+    .prepare(`UPDATE orders SET ${sets.join(", ")} WHERE id = ? RETURNING *`)
+    .bind(...values)
+    .first<OrderRow>();
+  return row ? rowToOrder(row) : undefined;
+}
+
+export async function getOrders(db: D1Database): Promise<Order[]> {
+  const result = await db
+    .prepare("SELECT * FROM orders ORDER BY created_at DESC")
+    .all<OrderRow>();
+  return (result.results ?? []).map(rowToOrder);
+}
+
+function generateOrderNumber(): string {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // Readable alphanumeric
+  let result = "";
+  for (let i = 0; i < 10; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return `CRFTK_${result}`;
+}
+
+export async function createOrder(
+  db: D1Database,
+  data: {
+    razorpayOrderId: string;
+    customerName: string;
+    customerEmail: string;
+    customerPhone: string;
+    customerAddress: string;
+    items: CartItem[];
+    amount: number;
+  }
+): Promise<Order> {
+  const orderNumber = generateOrderNumber();
+  const row = await db
+    .prepare(
+      `INSERT INTO orders (order_number, razorpay_order_id, customer_name, customer_email, customer_phone, customer_address, items, amount)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+       RETURNING *`
+    )
+    .bind(
+      orderNumber,
+      data.razorpayOrderId,
+      data.customerName,
+      data.customerEmail,
+      data.customerPhone,
+      data.customerAddress,
+      JSON.stringify(data.items),
+      data.amount
+    )
+    .first<OrderRow>();
+  if (!row) throw new Error("Failed to create order");
+  return rowToOrder(row);
+}
+
+export async function updateOrderStatus(
+  db: D1Database,
+  razorpayOrderId: string,
+  status: OrderStatus,
+  razorpayPaymentId?: string
+): Promise<Order | undefined> {
+  const row = await db
+    .prepare(
+      `UPDATE orders
+       SET status = ?, razorpay_payment_id = COALESCE(?, razorpay_payment_id), updated_at = datetime('now')
+       WHERE razorpay_order_id = ?
+       RETURNING *`
+    )
+    .bind(status, razorpayPaymentId ?? null, razorpayOrderId)
+    .first<OrderRow>();
+  return row ? rowToOrder(row) : undefined;
+}
+
+export async function getOrderById(
+  db: D1Database,
+  id: number
+): Promise<Order | undefined> {
+  const row = await db
+    .prepare("SELECT * FROM orders WHERE id = ?")
+    .bind(id)
+    .first<OrderRow>();
+  return row ? rowToOrder(row) : undefined;
+}
+
+/**
+ * Atomically decrements inventory by `quantity` only if stock is available.
+ * Returns null (without throwing) if insufficient inventory — callers must handle this.
+ */
+export async function reserveInventory(
+  db: D1Database,
+  productId: number,
+  quantity: number
+): Promise<Product | null> {
+  const row = await db
+    .prepare(
+      `UPDATE products
+       SET inventory = inventory - ?, updated_at = datetime('now')
+       WHERE id = ? AND inventory >= ? AND out_of_stock = 0
+       RETURNING *`
+    )
+    .bind(quantity, productId, quantity)
+    .first<D1Row>();
+  return row ? rowToProduct(row) : null;
+}
+
+/**
+ * Restores inventory — used when a pending order is cancelled before payment.
+ */
+export async function releaseInventory(
+  db: D1Database,
+  productId: number,
+  quantity: number
+): Promise<void> {
+  await db
+    .prepare(
+      `UPDATE products
+       SET inventory = inventory + ?,
+           out_of_stock = CASE WHEN (inventory + ?) > 0 THEN 0 ELSE out_of_stock END,
+           updated_at = datetime('now')
+       WHERE id = ?`
+    )
+    .bind(quantity, quantity, productId)
+    .run();
+}
+
+export async function cancelOrder(
+  db: D1Database,
+  razorpayOrderId: string
+): Promise<Order | undefined> {
+  const row = await db
+    .prepare(
+      `UPDATE orders
+       SET status = 'cancelled', updated_at = datetime('now')
+       WHERE razorpay_order_id = ? AND status = 'pending'
+       RETURNING *`
+    )
+    .bind(razorpayOrderId)
+    .first<OrderRow>();
+  return row ? rowToOrder(row) : undefined;
 }
 
 export async function adjustInventory(

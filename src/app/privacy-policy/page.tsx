@@ -10,7 +10,7 @@ export default function PrivacyPolicyPage() {
     <>
       <Header />
       <main className="min-h-screen bg-[#F8F5F0]">
-        <div className="pt-28 pb-20 px-4 sm:px-6">
+        <div className="pt-36 pb-20 px-4 sm:px-6">
           <div className="max-w-2xl mx-auto">
             <h1 className="font-[family-name:var(--font-heading)] text-4xl text-[#1C1C1C] font-light mb-8">
               Privacy Policy

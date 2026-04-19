@@ -13,7 +13,7 @@ export default function AboutPage() {
   return (
     <>
       <Header />
-      <main className="min-h-screen bg-[#F8F5F0]">
+      <main className="min-h-screen bg-[#F8F5F0] pt-32">
         {/* Hero */}
         <div className="relative h-[60vh] md:h-[70vh] overflow-hidden bg-[#2C2420]">
           <Image
