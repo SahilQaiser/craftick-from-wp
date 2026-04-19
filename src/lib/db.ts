@@ -1,7 +1,15 @@
 import type { Product } from "./products-static";
 import type { CartItem } from "@/contexts/CartContext";
 
-export type OrderStatus = "pending" | "paid" | "failed" | "cancelled";
+export type OrderStatus =
+  | "pending"
+  | "paid"
+  | "processing"
+  | "shipped"
+  | "delivered"
+  | "cancelled"
+  | "refunded"
+  | "failed";
 
 export type Order = {
   id: number;
@@ -14,7 +22,11 @@ export type Order = {
   items: CartItem[];
   amount: number;
   status: OrderStatus;
+  trackingNumber: string | null;
+  trackingUrl: string | null;
+  adminNotes: string | null;
   createdAt: string;
+  updatedAt: string;
 };
 
 type OrderRow = {
@@ -28,7 +40,11 @@ type OrderRow = {
   items: string;
   amount: number;
   status: string;
+  tracking_number: string | null;
+  tracking_url: string | null;
+  admin_notes: string | null;
   created_at: string;
+  updated_at: string;
 };
 
 function rowToOrder(row: OrderRow): Order {
@@ -43,7 +59,11 @@ function rowToOrder(row: OrderRow): Order {
     items: JSON.parse(row.items) as CartItem[],
     amount: row.amount,
     status: row.status as OrderStatus,
+    trackingNumber: row.tracking_number ?? null,
+    trackingUrl: row.tracking_url ?? null,
+    adminNotes: row.admin_notes ?? null,
     createdAt: row.created_at,
+    updatedAt: row.updated_at,
   };
 }
 
@@ -190,6 +210,55 @@ export async function deleteProduct(db: D1Database, id: number): Promise<boolean
     .bind(id)
     .run();
   return (result.meta?.changes ?? 0) > 0;
+}
+
+export async function getOrderByRazorpayId(
+  db: D1Database,
+  razorpayOrderId: string
+): Promise<Order | undefined> {
+  const row = await db
+    .prepare("SELECT * FROM orders WHERE razorpay_order_id = ?")
+    .bind(razorpayOrderId)
+    .first<OrderRow>();
+  return row ? rowToOrder(row) : undefined;
+}
+
+export async function searchOrder(
+  db: D1Database,
+  orderId: number,
+  email: string
+): Promise<Order | undefined> {
+  const row = await db
+    .prepare("SELECT * FROM orders WHERE id = ? AND customer_email = ?")
+    .bind(orderId, email.toLowerCase().trim())
+    .first<OrderRow>();
+  return row ? rowToOrder(row) : undefined;
+}
+
+export async function adminUpdateOrder(
+  db: D1Database,
+  id: number,
+  data: {
+    status?: OrderStatus;
+    trackingNumber?: string | null;
+    trackingUrl?: string | null;
+    adminNotes?: string | null;
+  }
+): Promise<Order | undefined> {
+  const sets: string[] = ["updated_at = datetime('now')"];
+  const values: (string | number | null)[] = [];
+
+  if (data.status !== undefined) { sets.push("status = ?"); values.push(data.status); }
+  if (data.trackingNumber !== undefined) { sets.push("tracking_number = ?"); values.push(data.trackingNumber); }
+  if (data.trackingUrl !== undefined) { sets.push("tracking_url = ?"); values.push(data.trackingUrl); }
+  if (data.adminNotes !== undefined) { sets.push("admin_notes = ?"); values.push(data.adminNotes); }
+
+  values.push(id);
+  const row = await db
+    .prepare(`UPDATE orders SET ${sets.join(", ")} WHERE id = ? RETURNING *`)
+    .bind(...values)
+    .first<OrderRow>();
+  return row ? rowToOrder(row) : undefined;
 }
 
 export async function getOrders(db: D1Database): Promise<Order[]> {

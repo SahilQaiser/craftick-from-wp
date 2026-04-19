@@ -6,7 +6,13 @@ export const metadata = {
   title: "Order Confirmed — Craftick",
 };
 
-export default function OrderSuccessPage() {
+interface Props {
+  searchParams: Promise<{ id?: string; track?: string }>;
+}
+
+export default async function OrderSuccessPage({ searchParams }: Props) {
+  const { id, track } = await searchParams;
+
   return (
     <>
       <Header />
@@ -19,11 +25,26 @@ export default function OrderSuccessPage() {
           <p className="text-[#4A4440] text-base font-[family-name:var(--font-heading)] italic mb-2">
             Your order has been confirmed.
           </p>
+          {id && (
+            <p className="text-sm text-[#6B6560] font-[family-name:var(--font-body)] mb-1">
+              Order <span className="font-semibold text-[#1C1C1C]">#{id}</span>
+            </p>
+          )}
           <p className="text-sm text-[#6B6560] font-[family-name:var(--font-body)] leading-relaxed mb-10">
-            A confirmation will be sent to your email shortly. Our team will
-            process your order and be in touch with shipping details.
+            Our team will process your order and be in touch with shipping details.
           </p>
-          <div className="h-px bg-[#E8E3DC] mb-10" />
+
+          <div className="h-px bg-[#E8E3DC] mb-8" />
+
+          {track && (
+            <Link
+              href={`/track/${track}`}
+              className="inline-block w-full bg-[#B5903A] text-white text-xs tracking-widest uppercase px-10 py-4 font-medium hover:bg-[#1C1C1C] transition-colors font-[family-name:var(--font-body)] mb-3"
+            >
+              Track Your Order
+            </Link>
+          )}
+
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link
               href="/shop"
@@ -38,6 +59,13 @@ export default function OrderSuccessPage() {
               Contact Us
             </Link>
           </div>
+
+          {track && (
+            <p className="text-[10px] text-[#8C8680] font-[family-name:var(--font-body)] mt-6">
+              Bookmark your tracking link:{" "}
+              <span className="font-mono text-[#6B6560]">/track/{track}</span>
+            </p>
+          )}
         </div>
       </main>
       <Footer />

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { getOrders } from "@/lib/db";
 import { formatPrice } from "@/lib/products-static";
@@ -5,7 +6,12 @@ import { formatPrice } from "@/lib/products-static";
 export const dynamic = "force-dynamic";
 
 const STATUS_STYLES: Record<string, string> = {
-  paid: "bg-green-50 border-green-200 text-green-700",
+  paid: "bg-blue-50 border-blue-200 text-blue-700",
+  processing: "bg-purple-50 border-purple-200 text-purple-700",
+  shipped: "bg-indigo-50 border-indigo-200 text-indigo-700",
+  delivered: "bg-green-50 border-green-200 text-green-700",
+  cancelled: "bg-red-50 border-red-200 text-red-600",
+  refunded: "bg-gray-50 border-gray-200 text-gray-600",
   pending: "bg-yellow-50 border-yellow-200 text-yellow-700",
   failed: "bg-red-50 border-red-200 text-red-600",
 };
@@ -33,12 +39,13 @@ export default async function AdminOrdersPage() {
                 <th className="text-center px-4 py-3 text-[10px] tracking-widest uppercase text-[#6B6560] font-medium">Status</th>
                 <th className="text-left px-4 py-3 text-[10px] tracking-widest uppercase text-[#6B6560] font-medium">Date</th>
                 <th className="text-left px-4 py-3 text-[10px] tracking-widest uppercase text-[#6B6560] font-medium">Razorpay ID</th>
+                <th className="text-right px-4 py-3 text-[10px] tracking-widest uppercase text-[#6B6560] font-medium">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#E8E3DC]">
               {orders.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="text-center py-12 text-[#8C8680]">
+                  <td colSpan={8} className="text-center py-12 text-[#8C8680]">
                     No orders yet.
                   </td>
                 </tr>
@@ -82,6 +89,14 @@ export default async function AdminOrdersPage() {
                     </td>
                     <td className="px-4 py-3 font-mono text-xs text-[#8C8680] max-w-[140px] truncate">
                       {order.razorpayPaymentId ?? <span className="text-[#C8C3BC]">—</span>}
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <Link
+                        href={`/admin/orders/${order.id}`}
+                        className="text-xs text-[#B5903A] hover:underline font-medium"
+                      >
+                        View
+                      </Link>
                     </td>
                   </tr>
                 ))

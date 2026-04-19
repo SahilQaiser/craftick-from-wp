@@ -102,8 +102,9 @@ export default function CartPage() {
           });
 
           if (verifyRes.ok) {
+            const data = await verifyRes.json() as { orderId: number; razorpayOrderId: string };
             clearCart();
-            router.push("/order-success");
+            router.push(`/order-success?id=${data.orderId}&track=${data.razorpayOrderId}`);
           } else {
             setError("Payment verification failed. Please contact us.");
           }
