@@ -4,8 +4,10 @@ import { verifySession, COOKIE_NAME } from "@/lib/auth";
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Allow login page through
-  if (pathname === "/admin/login") return NextResponse.next();
+  // Allow login page and auth API through
+  if (pathname === "/admin/login" || pathname === "/api/admin/auth/login") {
+    return NextResponse.next();
+  }
 
   const secret = process.env.AUTH_SECRET;
   if (!secret) {
