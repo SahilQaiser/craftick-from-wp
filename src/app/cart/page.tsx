@@ -33,7 +33,7 @@ export default function CartPage() {
   // Load public config
   useEffect(() => {
     fetch("/api/config/public")
-      .then((res) => res.json())
+      .then((res) => res.json() as Promise<{ enable_cod?: boolean }>)
       .then((data) => {
         if (data.enable_cod) setCodEnabled(true);
       })
