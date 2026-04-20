@@ -23,6 +23,7 @@ export type Order = {
   items: CartItem[];
   amount: number;
   status: OrderStatus;
+  paymentMethod: "online" | "cod";
   trackingNumber: string | null;
   trackingUrl: string | null;
   adminNotes: string | null;
@@ -42,6 +43,7 @@ type OrderRow = {
   items: string;
   amount: number;
   status: string;
+  payment_method: string;
   tracking_number: string | null;
   tracking_url: string | null;
   admin_notes: string | null;
@@ -62,6 +64,7 @@ function rowToOrder(row: OrderRow): Order {
     items: JSON.parse(row.items) as CartItem[],
     amount: row.amount,
     status: row.status as OrderStatus,
+    paymentMethod: (row.payment_method || "online") as "online" | "cod",
     trackingNumber: row.tracking_number ?? null,
     trackingUrl: row.tracking_url ?? null,
     adminNotes: row.admin_notes ?? null,
@@ -302,13 +305,15 @@ export async function createOrder(
     customerAddress: string;
     items: CartItem[];
     amount: number;
+    paymentMethod?: "online" | "cod";
   }
 ): Promise<Order> {
   const orderNumber = generateOrderNumber();
+  const paymentMethod = data.paymentMethod || "online";
   const row = await db
     .prepare(
-      `INSERT INTO orders (order_number, razorpay_order_id, customer_name, customer_email, customer_phone, customer_address, items, amount)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `INSERT INTO orders (order_number, razorpay_order_id, customer_name, customer_email, customer_phone, customer_address, items, amount, payment_method)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
        RETURNING *`
     )
     .bind(
@@ -319,7 +324,8 @@ export async function createOrder(
       data.customerPhone,
       data.customerAddress,
       JSON.stringify(data.items),
-      data.amount
+      data.amount,
+      paymentMethod
     )
     .first<OrderRow>();
   if (!row) throw new Error("Failed to create order");
@@ -424,4 +430,33 @@ export async function adjustInventory(
     .bind(delta, id)
     .first<D1Row>();
   return row ? rowToProduct(row) : undefined;
+}
+
+// --- Settings ---
+
+export async function getSetting(
+  db: D1Database,
+  key: string,
+  defaultValue: string = ""
+): Promise<string> {
+  const row = await db
+    .prepare("SELECT value FROM settings WHERE key = ?")
+    .bind(key)
+    .first<{ value: string }>();
+  return row ? row.value : defaultValue;
+}
+
+export async function setSetting(
+  db: D1Database,
+  key: string,
+  value: string
+): Promise<void> {
+  await db
+    .prepare(
+      `INSERT INTO settings (key, value)
+       VALUES (?, ?)
+       ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = datetime('now')`
+    )
+    .bind(key, value)
+    .run();
 }

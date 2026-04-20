@@ -27,6 +27,18 @@ export default function CartPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [rzpReady, setRzpReady] = useState(false);
+  const [codEnabled, setCodEnabled] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<"online" | "cod">("online");
+
+  // Load public config
+  useEffect(() => {
+    fetch("/api/config/public")
+      .then((res) => res.json() as Promise<{ enable_cod?: boolean }>)
+      .then((data) => {
+        if (data.enable_cod) setCodEnabled(true);
+      })
+      .catch(() => {});
+  }, []);
 
   // Load Razorpay checkout.js
   useEffect(() => {
@@ -54,6 +66,34 @@ export default function CartPage() {
     }
 
     setLoading(true);
+
+    if (paymentMethod === "cod") {
+      try {
+        const res = await fetch("/api/checkout/create-cod-order", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            items,
+            customer: { name, email, phone, address },
+          }),
+        });
+
+        if (!res.ok) {
+          const data = await res.json() as { error?: string };
+          throw new Error(data.error ?? "Failed to place COD order");
+        }
+
+        const data = await res.json() as { orderId: string; trackingId: string };
+        clearCart();
+        router.push(`/order-success?id=${data.orderId}&track=${data.trackingId}`);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Something went wrong");
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
+
     try {
       const res = await fetch("/api/checkout/create-order", {
         method: "POST",
@@ -340,12 +380,44 @@ export default function CartPage() {
                     </p>
                   )}
 
+                  {codEnabled && (
+                    <div className="mt-6">
+                      <h3 className="block text-[10px] tracking-widest uppercase text-[#8C8680] font-medium font-[family-name:var(--font-body)] mb-2">
+                        Payment Method
+                      </h3>
+                      <div className="space-y-2">
+                        <label className="flex items-center gap-3 cursor-pointer p-3 border border-[#E8E3DC] bg-[#F8F5F0]">
+                          <input
+                            type="radio"
+                            name="paymentMethod"
+                            value="online"
+                            checked={paymentMethod === "online"}
+                            onChange={() => setPaymentMethod("online")}
+                            className="text-[#B5903A] focus:ring-[#B5903A]"
+                          />
+                          <span className="text-sm font-medium text-[#1C1C1C] font-[family-name:var(--font-body)]">Pay Online (Razorpay)</span>
+                        </label>
+                        <label className="flex items-center gap-3 cursor-pointer p-3 border border-[#E8E3DC] bg-[#F8F5F0]">
+                          <input
+                            type="radio"
+                            name="paymentMethod"
+                            value="cod"
+                            checked={paymentMethod === "cod"}
+                            onChange={() => setPaymentMethod("cod")}
+                            className="text-[#B5903A] focus:ring-[#B5903A]"
+                          />
+                          <span className="text-sm font-medium text-[#1C1C1C] font-[family-name:var(--font-body)]">Cash on Delivery</span>
+                        </label>
+                      </div>
+                    </div>
+                  )}
+
                   <button
                     onClick={handleCheckout}
                     disabled={loading}
                     className="mt-6 w-full bg-[#1C1C1C] text-white text-xs tracking-widest uppercase px-8 py-4 font-medium hover:bg-[#B5903A] transition-colors disabled:opacity-60 disabled:cursor-not-allowed font-[family-name:var(--font-body)]"
                   >
-                    {loading ? "Processing..." : "Proceed to Pay"}
+                    {loading ? "Processing..." : paymentMethod === "cod" ? "Place Order" : "Proceed to Pay"}
                   </button>
                 </div>
               </div>
