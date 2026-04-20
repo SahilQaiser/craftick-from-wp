@@ -4,7 +4,7 @@ import { setSetting } from "@/lib/db";
 
 export async function POST(request: NextRequest) {
   try {
-    const { key, value } = await request.json();
+    const { key, value } = (await request.json()) as { key?: string; value?: string };
     if (!key || typeof value !== "string") {
       return NextResponse.json({ error: "Invalid data" }, { status: 400 });
     }
