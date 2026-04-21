@@ -5,7 +5,6 @@ import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { getFeaturedProducts } from "@/lib/db";
-import { categories } from "@/lib/categories";
 import { formatPrice } from "@/lib/products-static";
 
 export const dynamic = "force-dynamic";
@@ -15,20 +14,26 @@ const craftStories = [
     title: "Tilla Embroidery",
     description:
       "Tilla work uses fine metallic gold or silver threads to create intricate patterns on Pashmina. Originating in Central Asia, it was perfected by Kashmiri artisans over centuries.",
-    icon: "✦",
   },
   {
     title: "Sozni Work",
     description:
       "Sozni is Kashmir's finest needle embroidery, done with a single needle and thread. It takes months to complete one shawl, making each piece a labour of love.",
-    icon: "✧",
   },
   {
     title: "Pure Pashmina",
     description:
       "Sourced from the underbelly of Changthangi goats in the high Himalayas, Pashmina is finer than human hair and extraordinarily warm.",
-    icon: "◇",
   },
+];
+
+// Replace these with actual media mentions, awards, and recognitions
+const pressItems = [
+  "National Craft Council",
+  "Outlook Traveller",
+  "India Today",
+  "Kashmir Times",
+  "GI Certified Artisans",
 ];
 
 export default async function Home() {
@@ -39,62 +44,86 @@ export default async function Home() {
     <>
       <Header />
       <main>
-        {/* Hero Section */}
-        <section className="relative min-h-screen flex items-end pb-16 md:pb-24 pt-32 overflow-hidden bg-[#2C2420]">
-          {/* Background image */}
-          <div className="absolute inset-0">
-            <Image
-              src="/images/products/13.jpg"
-              alt="Kashmiri Pashmina Shawl"
-              fill
-              className="object-cover object-top opacity-60"
-              priority
-              sizes="100vw"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#1C1410]/90 via-[#1C1410]/30 to-transparent" />
-          </div>
 
-          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-            <div className="max-w-2xl">
-              <p className="text-[#D4AF6A] text-xs tracking-[0.3em] uppercase mb-4 font-[family-name:var(--font-body)] font-medium">
+        {/* ── Hero: light editorial split ── */}
+        <section className="flex flex-col lg:flex-row min-h-screen">
+          {/* Left: text */}
+          <div className="flex flex-col justify-center px-8 sm:px-12 lg:px-16 xl:px-24 py-20 lg:py-0 lg:w-[42%] xl:w-[40%] bg-[#F8F5F0] order-2 lg:order-1 lg:pt-44">
+            <div className="max-w-md">
+              <p className="text-[#B5903A] text-[10px] tracking-[0.35em] uppercase font-medium font-[family-name:var(--font-body)] mb-5">
                 Handcrafted in Kashmir
               </p>
-              <h1 className="font-[family-name:var(--font-heading)] text-5xl md:text-7xl lg:text-8xl text-white font-light leading-[1.05] mb-6">
+              <h1 className="font-[family-name:var(--font-heading)] text-5xl md:text-6xl lg:text-7xl text-[#1C1C1C] font-light leading-[1.05] mb-6">
                 The Art of{" "}
-                <em className="italic">Kashmiri</em>{" "}
+                <em className="italic text-[#6B6560]">Kashmiri</em>{" "}
                 Craft
               </h1>
-              <p className="text-[#C8C3BC] text-base md:text-lg leading-relaxed mb-10 max-w-lg font-[family-name:var(--font-body)] font-light">
+              <p className="text-[#6B6560] text-base leading-relaxed mb-10 font-[family-name:var(--font-body)] font-light">
                 Each shawl is a canvas — woven from the finest Pashmina and
                 embroidered by hand over months of dedicated artisanal work.
               </p>
               <div className="flex flex-wrap gap-4">
                 <Link
                   href="/shop"
-                  className="inline-block bg-[#B5903A] text-white text-xs tracking-widest uppercase px-8 py-4 font-medium hover:bg-[#9A7A2E] transition-colors font-[family-name:var(--font-body)]"
+                  className="inline-block bg-[#1C1C1C] text-white text-[11px] tracking-widest uppercase px-8 py-4 font-medium hover:bg-[#B5903A] transition-colors duration-300 font-[family-name:var(--font-body)]"
                 >
                   Explore Collection
                 </Link>
                 <Link
                   href="/about"
-                  className="inline-block border border-white/40 text-white text-xs tracking-widest uppercase px-8 py-4 font-medium hover:bg-white/10 transition-colors font-[family-name:var(--font-body)]"
+                  className="inline-block border border-[#C8C3BC] text-[#4A4440] text-[11px] tracking-widest uppercase px-8 py-4 font-medium hover:border-[#1C1C1C] hover:text-[#1C1C1C] transition-colors duration-300 font-[family-name:var(--font-body)]"
                 >
                   Our Story
                 </Link>
               </div>
+              <div className="flex flex-wrap items-center gap-6 mt-12 pt-8 border-t border-[#E8E3DC]">
+                {["Handcrafted", "Authentic", "Worldwide Shipping"].map((t) => (
+                  <div key={t} className="flex items-center gap-1.5 text-[10px] tracking-[0.15em] uppercase text-[#8C8680] font-[family-name:var(--font-body)]">
+                    <span className="text-[#B5903A]">✦</span>
+                    {t}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 
-          {/* Scroll indicator */}
-          <div className="absolute bottom-8 right-8 hidden md:flex flex-col items-center gap-2 text-white/40">
-            <span className="text-[10px] tracking-widest uppercase rotate-90 origin-center font-[family-name:var(--font-body)]">Scroll</span>
-            <div className="w-px h-12 bg-white/20 relative overflow-hidden">
-              <div className="absolute top-0 left-0 w-full h-full bg-white/60 animate-scroll-indicator" />
+          {/* Right: full-bleed editorial image */}
+          <div className="relative overflow-hidden lg:w-[58%] xl:w-[60%] order-1 lg:order-2 h-[65vw] sm:h-[55vw] lg:h-auto">
+            <Image
+              src="/images/products/13.jpg"
+              alt="Kashmiri Pashmina Shawl"
+              fill
+              className="object-cover object-top"
+              priority
+              sizes="(max-width: 1024px) 100vw, 60vw"
+            />
+          </div>
+        </section>
+
+        {/* ── Press / Awards Strip ── */}
+        <section className="bg-white border-y border-[#E8E3DC] py-8">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col sm:flex-row items-center gap-5 sm:gap-0">
+              <p className="shrink-0 text-[10px] tracking-[0.3em] uppercase text-[#8C8680] font-[family-name:var(--font-body)] sm:pr-8 sm:border-r sm:border-[#E8E3DC]">
+                As Featured In
+              </p>
+              <div className="flex flex-wrap justify-center sm:justify-start items-center sm:pl-8 w-full">
+                {pressItems.map((item, i) => (
+                  <span key={item} className="flex items-center">
+                    <span className="text-[11px] tracking-[0.2em] uppercase font-medium text-[#4A4440] font-[family-name:var(--font-body)] px-4 py-1 whitespace-nowrap">
+                      {item}
+                    </span>
+                    {i < pressItems.length - 1 && (
+                      <span className="text-[#B5903A] text-xs select-none">·</span>
+                    )}
+                  </span>
+                ))}
+              </div>
             </div>
           </div>
         </section>
 
-        {/* Categories Section */}
+        {/* ── Categories ── */}
         <section className="py-20 md:py-28 bg-[#F8F5F0]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-14">
@@ -106,81 +135,44 @@ export default async function Home() {
               </h2>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Pashmina Shawls */}
-              <Link
-                href="/shop?category=pashmina-shawls"
-                className="group relative overflow-hidden aspect-[3/4] bg-[#EDE8E1]"
-              >
-                <Image
-                  src="/images/products/16.jpg"
-                  alt="Pashmina Shawls"
-                  fill
-                  className="object-cover object-top transition-transform duration-700 group-hover:scale-105"
-                  sizes="(max-width: 768px) 100vw, 33vw"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-                <div className="absolute bottom-0 left-0 right-0 p-6">
-                  <h3 className="font-[family-name:var(--font-heading)] text-2xl text-white font-light mb-1">
-                    Pashmina Shawls
-                  </h3>
-                  <p className="text-white/70 text-xs tracking-widest uppercase font-[family-name:var(--font-body)]">
-                    12 Products
-                  </p>
-                </div>
-              </Link>
-
-              {/* Stoles & Scarves */}
-              <Link
-                href="/shop?category=stoles-and-scarves"
-                className="group relative overflow-hidden aspect-[3/4] bg-[#EDE8E1]"
-              >
-                <Image
-                  src="/images/products/emerald-green-tilla.jpg"
-                  alt="Stoles & Scarves"
-                  fill
-                  className="object-cover object-top transition-transform duration-700 group-hover:scale-105"
-                  sizes="(max-width: 768px) 100vw, 33vw"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-                <div className="absolute bottom-0 left-0 right-0 p-6">
-                  <h3 className="font-[family-name:var(--font-heading)] text-2xl text-white font-light mb-1">
-                    Stoles &amp; Scarves
-                  </h3>
-                  <p className="text-white/70 text-xs tracking-widest uppercase font-[family-name:var(--font-body)]">
-                    6 Products
-                  </p>
-                </div>
-              </Link>
-
-              {/* Sarees */}
-              <Link
-                href="/shop?category=sarees"
-                className="group relative overflow-hidden aspect-[3/4] bg-[#EDE8E1]"
-              >
-                <Image
-                  src="/images/products/blue-saree.jpg"
-                  alt="Sarees"
-                  fill
-                  className="object-cover object-top transition-transform duration-700 group-hover:scale-105"
-                  sizes="(max-width: 768px) 100vw, 33vw"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-                <div className="absolute bottom-0 left-0 right-0 p-6">
-                  <h3 className="font-[family-name:var(--font-heading)] text-2xl text-white font-light mb-1">
-                    Sarees
-                  </h3>
-                  <p className="text-white/70 text-xs tracking-widest uppercase font-[family-name:var(--font-body)]">
-                    1 Product
-                  </p>
-                </div>
-              </Link>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+              {[
+                { label: "Pashmina Shawls", slug: "pashmina-shawls", img: "/images/products/16.jpg" },
+                { label: "Stoles & Scarves", slug: "stoles-and-scarves", img: "/images/products/emerald-green-tilla.jpg" },
+                { label: "Sarees", slug: "sarees", img: "/images/products/blue-saree.jpg" },
+              ].map((cat) => (
+                <Link
+                  key={cat.slug}
+                  href={`/shop?category=${cat.slug}`}
+                  className="group relative overflow-hidden aspect-[3/4] bg-[#EDE8E1]"
+                >
+                  <Image
+                    src={cat.img}
+                    alt={cat.label}
+                    fill
+                    className="object-cover object-top transition-transform duration-700 group-hover:scale-105"
+                    sizes="(max-width: 768px) 100vw, 33vw"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-6">
+                    <h3 className="font-[family-name:var(--font-heading)] text-2xl text-white font-light mb-1">
+                      {cat.label}
+                    </h3>
+                    <span className="inline-flex items-center gap-1.5 text-white/60 text-[10px] tracking-widest uppercase font-[family-name:var(--font-body)] group-hover:text-[#D4AF6A] transition-colors">
+                      Explore
+                      <svg className="w-3 h-3 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                      </svg>
+                    </span>
+                  </div>
+                </Link>
+              ))}
             </div>
           </div>
         </section>
 
-        {/* Featured Products Section */}
-        <section className="py-20 md:py-28 bg-white">
+        {/* ── Featured Products ── */}
+        <section className="py-20 md:py-28 bg-[#F8F5F0]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-end justify-between mb-12">
               <div>
@@ -219,8 +211,8 @@ export default async function Home() {
           </div>
         </section>
 
-        {/* Heritage Banner */}
-        <section className="relative overflow-hidden bg-[#1C1C1C] py-24 md:py-32">
+        {/* ── Heritage Banner ── */}
+        <section className="relative overflow-hidden bg-[#1C1C1C] py-24 md:py-32 border-t border-[#2C2C2C]">
           <div className="absolute inset-0 opacity-20">
             <Image
               src="/images/products/39.jpg"
@@ -249,7 +241,7 @@ export default async function Home() {
           </div>
         </section>
 
-        {/* Craft Stories */}
+        {/* ── Craft Stories ── */}
         <section className="py-20 md:py-28 bg-[#F8F5F0]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
@@ -261,10 +253,10 @@ export default async function Home() {
               </h2>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
               {craftStories.map((story) => (
-                <div key={story.title} className="text-center">
-                  <div className="text-2xl text-[#B5903A] mb-5">{story.icon}</div>
+                <div key={story.title} className="border border-[#E8E3DC] p-8 bg-white text-center">
+                  <div className="w-8 h-px bg-[#B5903A] mx-auto mb-6" />
                   <h3 className="font-[family-name:var(--font-heading)] text-2xl text-[#1C1C1C] font-medium mb-4">
                     {story.title}
                   </h3>
@@ -277,8 +269,8 @@ export default async function Home() {
           </div>
         </section>
 
-        {/* Second Product Row */}
-        <section className="py-20 md:py-28 bg-white">
+        {/* ── New Arrivals ── */}
+        <section className="py-20 md:py-28 bg-[#F8F5F0]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-end justify-between mb-12">
               <div>
@@ -300,9 +292,7 @@ export default async function Home() {
               </Link>
             </div>
 
-            {/* Split layout: large image + 2 products */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Large featured */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
               <Link
                 href="/shop/sozni-print-jamavaar-pashmina"
                 className="group relative overflow-hidden aspect-[4/5] bg-[#EDE8E1]"
@@ -328,8 +318,7 @@ export default async function Home() {
                 </div>
               </Link>
 
-              {/* Two stacked products */}
-              <div className="grid grid-cols-1 gap-6">
+              <div className="grid grid-cols-1 gap-4 md:gap-6">
                 <Link
                   href="/shop/butidar-pashmina-shawl-wrap"
                   className="group relative overflow-hidden aspect-[16/9] bg-[#EDE8E1]"
@@ -378,8 +367,8 @@ export default async function Home() {
           </div>
         </section>
 
-        {/* CTA / Newsletter */}
-        <section className="py-20 bg-[#F8F5F0] border-t border-[#E8E3DC]">
+        {/* ── CTA ── */}
+        <section className="py-20 bg-white border-t border-[#E8E3DC]">
           <div className="max-w-2xl mx-auto px-4 sm:px-6 text-center">
             <p className="text-[#B5903A] text-[10px] tracking-[0.35em] uppercase font-medium font-[family-name:var(--font-body)] mb-3">
               Enquiries
@@ -398,6 +387,7 @@ export default async function Home() {
             </Link>
           </div>
         </section>
+
       </main>
       <Footer />
     </>

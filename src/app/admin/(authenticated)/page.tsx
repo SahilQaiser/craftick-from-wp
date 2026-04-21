@@ -1,13 +1,15 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { getProducts } from "@/lib/db";
-import { categories } from "@/lib/categories";
+import { getProducts, getCategories } from "@/lib/db";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminDashboardPage() {
   const { env } = await getCloudflareContext({ async: true });
-  const products = await getProducts(env.DB);
+  const [products, categories] = await Promise.all([
+    getProducts(env.DB),
+    getCategories(env.DB),
+  ]);
 
   const stats = {
     total: products.length,

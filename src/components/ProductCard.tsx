@@ -38,17 +38,16 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
             </span>
           </div>
         )}
-        {/* Hover overlay */}
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
-        {/* Quick view on hover */}
-        <div className="absolute bottom-0 left-0 right-0 bg-[#1C1C1C] text-white text-center py-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300 text-xs tracking-widest uppercase font-medium">
+        {/* Slide-up bar */}
+        <div className="absolute bottom-0 left-0 right-0 bg-[#1C1C1C] text-white text-center py-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300 text-xs tracking-widest uppercase font-[family-name:var(--font-heading)] italic">
           View Details
         </div>
       </div>
 
       {/* Product info */}
       <div className="space-y-1">
-        <p className="text-[10px] tracking-widest uppercase text-[#B5903A] font-medium font-[family-name:var(--font-body)]">
+        <p className="text-[10px] tracking-widest uppercase text-[#B5903A] font-[family-name:var(--font-body)]">
           {product.subtitle}
         </p>
         <h3 className="text-base font-[family-name:var(--font-heading)] font-medium text-[#1C1C1C] leading-snug group-hover:text-[#B5903A] transition-colors line-clamp-2">

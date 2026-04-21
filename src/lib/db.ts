@@ -1,6 +1,102 @@
 import type { Product } from "./products-static";
 import type { CartItem } from "@/contexts/CartContext";
 
+// --- Category ---
+
+export type Category = {
+  id: number;
+  slug: string;
+  name: string;
+  description: string;
+  image: string;
+  sortOrder: number;
+  showInNav: boolean;
+};
+
+type CategoryRow = {
+  id: number;
+  slug: string;
+  name: string;
+  description: string;
+  image: string;
+  sort_order: number;
+  show_in_nav: number;
+};
+
+function rowToCategory(row: CategoryRow): Category {
+  return {
+    id: row.id,
+    slug: row.slug,
+    name: row.name,
+    description: row.description,
+    image: row.image,
+    sortOrder: row.sort_order,
+    showInNav: row.show_in_nav !== 0,
+  };
+}
+
+export async function getCategories(db: D1Database): Promise<Category[]> {
+  const result = await db
+    .prepare("SELECT * FROM categories ORDER BY sort_order ASC, id ASC")
+    .all<CategoryRow>();
+  return (result.results ?? []).map(rowToCategory);
+}
+
+export async function getCategoryBySlug(db: D1Database, slug: string): Promise<Category | undefined> {
+  const row = await db
+    .prepare("SELECT * FROM categories WHERE slug = ?")
+    .bind(slug)
+    .first<CategoryRow>();
+  return row ? rowToCategory(row) : undefined;
+}
+
+export async function createCategory(
+  db: D1Database,
+  data: Omit<Category, "id">
+): Promise<Category> {
+  const row = await db
+    .prepare(
+      `INSERT INTO categories (slug, name, description, image, sort_order, show_in_nav)
+       VALUES (?, ?, ?, ?, ?, ?)
+       RETURNING *`
+    )
+    .bind(data.slug, data.name, data.description, data.image, data.sortOrder, data.showInNav ? 1 : 0)
+    .first<CategoryRow>();
+  if (!row) throw new Error("Failed to create category");
+  return rowToCategory(row);
+}
+
+export async function updateCategory(
+  db: D1Database,
+  slug: string,
+  data: Partial<Omit<Category, "id">>
+): Promise<Category | undefined> {
+  const sets: string[] = ["updated_at = datetime('now')"];
+  const values: (string | number)[] = [];
+
+  if (data.name !== undefined)        { sets.push("name = ?");         values.push(data.name); }
+  if (data.description !== undefined) { sets.push("description = ?");  values.push(data.description); }
+  if (data.image !== undefined)       { sets.push("image = ?");        values.push(data.image); }
+  if (data.sortOrder !== undefined)   { sets.push("sort_order = ?");   values.push(data.sortOrder); }
+  if (data.showInNav !== undefined)   { sets.push("show_in_nav = ?");  values.push(data.showInNav ? 1 : 0); }
+  if (data.slug !== undefined)        { sets.push("slug = ?");         values.push(data.slug); }
+
+  values.push(slug);
+  const row = await db
+    .prepare(`UPDATE categories SET ${sets.join(", ")} WHERE slug = ? RETURNING *`)
+    .bind(...values)
+    .first<CategoryRow>();
+  return row ? rowToCategory(row) : undefined;
+}
+
+export async function deleteCategory(db: D1Database, slug: string): Promise<boolean> {
+  const result = await db
+    .prepare("DELETE FROM categories WHERE slug = ?")
+    .bind(slug)
+    .run();
+  return (result.meta?.changes ?? 0) > 0;
+}
+
 export type OrderStatus =
   | "pending"
   | "paid"

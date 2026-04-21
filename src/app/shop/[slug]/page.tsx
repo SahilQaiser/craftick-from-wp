@@ -5,8 +5,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
 import ProductImageGallery from "@/components/ProductImageGallery";
-import { getProductBySlug, getProductsByCategory } from "@/lib/db";
-import { categories } from "@/lib/categories";
+import { getProductBySlug, getProductsByCategory, getCategories } from "@/lib/db";
 import { formatPrice } from "@/lib/products-static";
 import AddToCartButton from "@/components/AddToCartButton";
 
@@ -34,8 +33,12 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   if (!product) notFound();
 
+  const [categories, relatedRaw] = await Promise.all([
+    getCategories(env.DB),
+    getProductsByCategory(env.DB, product.category),
+  ]);
   const category = categories.find((c) => c.slug === product.category);
-  const related = (await getProductsByCategory(env.DB, product.category))
+  const related = relatedRaw
     .filter((p) => p.id !== product.id)
     .slice(0, 4);
 
@@ -44,7 +47,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
       <Header />
       <main className="min-h-screen bg-[#F8F5F0]">
         {/* Breadcrumb */}
-        <div className="pt-36 pb-4 bg-white border-b border-[#E8E3DC]">
+        <div className="pt-36 md:pt-44 pb-4 bg-[#F8F5F0] border-b border-[#E8E3DC]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <nav className="flex items-center gap-2 text-xs text-[#8C8680] font-[family-name:var(--font-body)]">
               <Link href="/" className="hover:text-[#B5903A] transition-colors">
@@ -115,14 +118,14 @@ export default async function ProductPage({ params }: ProductPageProps) {
               </p>
 
               {/* Features */}
-              <div className="grid grid-cols-2 gap-4 mb-8">
+              <div className="grid grid-cols-2 gap-3 mb-8">
                 {[
                   { label: "Origin", value: "Kashmir, India" },
                   { label: "Craft", value: product.subtitle },
                   { label: "Authenticity", value: "100% Genuine" },
                   { label: "Shipping", value: "Worldwide" },
                 ].map((feat) => (
-                  <div key={feat.label} className="bg-white p-4 border border-[#E8E3DC]">
+                  <div key={feat.label} className="bg-[#FAF8F4] p-4 border border-[#E8E3DC]">
                     <p className="text-[10px] tracking-widest uppercase text-[#B5903A] font-medium font-[family-name:var(--font-body)] mb-1">
                       {feat.label}
                     </p>
@@ -165,7 +168,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
         {/* Related products */}
         {related.length > 0 && (
-          <div className="bg-white py-16 md:py-20">
+          <div className="bg-[#F8F5F0] border-t border-[#E8E3DC] py-16 md:py-20">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="flex items-end justify-between mb-10">
                 <h2 className="font-[family-name:var(--font-heading)] text-3xl text-[#1C1C1C] font-light">

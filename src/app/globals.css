@@ -9,6 +9,8 @@
   --color-border: #E8E3DC;
   --color-gold: #B5903A;
   --color-gold-light: #D4AF6A;
+  --color-announcement-bg: #EDE8DF;
+  --color-announcement-text: #4A4440;
 }
 
 @theme inline {
@@ -54,7 +56,7 @@ h1, h2, h3, h4, h5, h6 {
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-muted);
+  background: var(--color-gold);
 }
 
 /* Smooth image loading */
@@ -75,4 +77,19 @@ img {
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.5s ease forwards;
 }
