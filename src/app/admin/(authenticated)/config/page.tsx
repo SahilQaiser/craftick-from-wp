@@ -6,8 +6,11 @@ export const dynamic = "force-dynamic";
 
 export default async function AdminConfigPage() {
   const { env } = await getCloudflareContext({ async: true });
-  const codSetting = await getSetting(env.DB, "enable_cod", "false");
-  const initialCodEnabled = codSetting === "true";
+  const [codSetting, waNumber, waMessage] = await Promise.all([
+    getSetting(env.DB, "enable_cod", "false"),
+    getSetting(env.DB, "whatsapp_number", "919149545438"),
+    getSetting(env.DB, "whatsapp_message", "Hi! I'm interested in your Kashmiri handcrafted products."),
+  ]);
 
   return (
     <div className="p-8">
@@ -16,7 +19,11 @@ export default async function AdminConfigPage() {
         <p className="text-sm text-[#6B6560] mt-1">Manage global site settings</p>
       </div>
 
-      <ConfigForm initialCodEnabled={initialCodEnabled} />
+      <ConfigForm
+        initialCodEnabled={codSetting === "true"}
+        initialWaNumber={waNumber}
+        initialWaMessage={waMessage}
+      />
     </div>
   );
 }

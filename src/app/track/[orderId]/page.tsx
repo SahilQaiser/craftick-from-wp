@@ -6,6 +6,7 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { getOrderByRazorpayId } from "@/lib/db";
 import { formatPrice } from "@/lib/products-static";
 import type { OrderStatus } from "@/lib/db";
+import WhatsAppOrderButton from "@/components/WhatsAppOrderButton";
 
 export const dynamic = "force-dynamic";
 
@@ -198,12 +199,7 @@ export default async function TrackDetailPage({ params }: Props) {
             >
               Continue Shopping
             </Link>
-            <Link
-              href="/contact"
-              className="border border-[#E8E3DC] text-[#4A4440] text-xs tracking-widest uppercase px-8 py-3.5 font-medium hover:border-[#1C1C1C] hover:text-[#1C1C1C] transition-colors font-[family-name:var(--font-body)]"
-            >
-              Need Help?
-            </Link>
+            <WhatsAppOrderButton orderNumber={order.orderNumber} />
           </div>
         </div>
       </main>
