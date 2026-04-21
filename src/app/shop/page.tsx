@@ -3,8 +3,7 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
-import { getProducts } from "@/lib/db";
-import { categories } from "@/lib/categories";
+import { getProducts, getCategories } from "@/lib/db";
 
 interface ShopPageProps {
   searchParams: Promise<{ category?: string; q?: string }>;
@@ -18,8 +17,10 @@ export const metadata = {
 
 async function ShopContent({ categorySlug, query }: { categorySlug?: string; query?: string }) {
   const { env } = await getCloudflareContext({ async: true });
-  let allProducts = await getProducts(env.DB);
-
+  const [allProducts, categories] = await Promise.all([
+    getProducts(env.DB),
+    getCategories(env.DB),
+  ]);
   let filtered = allProducts;
 
   if (categorySlug) {
@@ -41,7 +42,7 @@ async function ShopContent({ categorySlug, query }: { categorySlug?: string; que
   return (
     <div className="min-h-screen bg-[#F8F5F0]">
       {/* Page header */}
-      <div className="bg-white border-b border-[#E8E3DC] pt-32 pb-10">
+      <div className="bg-[#F8F5F0] border-b border-[#E8E3DC] pt-36 md:pt-44 pb-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <p className="text-[#B5903A] text-[10px] tracking-[0.35em] uppercase font-medium font-[family-name:var(--font-body)] mb-3">
             {activeCategory ? "Category" : "All Products"}
@@ -49,8 +50,10 @@ async function ShopContent({ categorySlug, query }: { categorySlug?: string; que
           <h1 className="font-[family-name:var(--font-heading)] text-4xl md:text-5xl text-[#1C1C1C] font-light">
             {activeCategory ? activeCategory.name : "Shop All"}
           </h1>
+          {/* Gold underline accent */}
+          <div className="w-12 h-0.5 bg-[#B5903A] mt-4" />
           {activeCategory && (
-            <p className="text-[#6B6560] text-sm mt-3 font-[family-name:var(--font-body)]">
+            <p className="text-[#6B6560] text-sm mt-4 font-[family-name:var(--font-body)]">
               {activeCategory.description}
             </p>
           )}
@@ -63,7 +66,7 @@ async function ShopContent({ categorySlug, query }: { categorySlug?: string; que
           <div className="flex flex-wrap gap-2">
             <a
               href="/shop"
-              className={`text-xs tracking-widest uppercase px-4 py-2 border transition-colors font-[family-name:var(--font-body)] font-medium ${
+              className={`text-xs tracking-widest uppercase px-4 py-2 border transition-all duration-200 font-[family-name:var(--font-body)] font-medium ${
                 !categorySlug
                   ? "border-[#1C1C1C] bg-[#1C1C1C] text-white"
                   : "border-[#E8E3DC] text-[#4A4440] hover:border-[#1C1C1C]"
@@ -75,7 +78,7 @@ async function ShopContent({ categorySlug, query }: { categorySlug?: string; que
               <a
                 key={cat.slug}
                 href={`/shop?category=${cat.slug}`}
-                className={`text-xs tracking-widest uppercase px-4 py-2 border transition-colors font-[family-name:var(--font-body)] font-medium ${
+                className={`text-xs tracking-widest uppercase px-4 py-2 border transition-all duration-200 font-[family-name:var(--font-body)] font-medium ${
                   categorySlug === cat.slug
                     ? "border-[#1C1C1C] bg-[#1C1C1C] text-white"
                     : "border-[#E8E3DC] text-[#4A4440] hover:border-[#1C1C1C]"

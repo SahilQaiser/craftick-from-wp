@@ -3,14 +3,16 @@
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { categories } from "@/lib/categories";
 import type { Product } from "@/lib/products-static";
 
+type CategoryOption = { slug: string; name: string };
+
 interface Props {
-  product?: Product; // undefined = new product
+  product?: Product;
+  categories?: CategoryOption[];
 }
 
-export default function ProductForm({ product }: Props) {
+export default function ProductForm({ product, categories = [] }: Props) {
   const router = useRouter();
   const isEdit = !!product;
   const fileRef = useRef<HTMLInputElement>(null);
@@ -22,7 +24,7 @@ export default function ProductForm({ product }: Props) {
     slug: product?.slug ?? "",
     description: product?.description ?? "",
     price: product?.price?.toString() ?? "",
-    category: product?.category ?? categories[0].slug,
+    category: product?.category ?? categories[0]?.slug ?? "",
     featured: product?.featured ?? false,
     outOfStock: product?.outOfStock ?? false,
     inventory: product?.inventory?.toString() ?? "0",

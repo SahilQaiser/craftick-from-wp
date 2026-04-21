@@ -13,14 +13,14 @@ export default function AboutPage() {
   return (
     <>
       <Header />
-      <main className="min-h-screen bg-[#F8F5F0] pt-32">
+      <main className="min-h-screen bg-[#F8F5F0] pt-36 md:pt-44">
         {/* Hero */}
         <div className="relative h-[60vh] md:h-[70vh] overflow-hidden bg-[#2C2420]">
           <Image
             src="/images/products/41.jpg"
             alt="Kashmiri artisan at work"
             fill
-            className="object-cover object-top opacity-50"
+            className="object-cover object-top opacity-40"
             priority
             sizes="100vw"
           />
@@ -77,9 +77,10 @@ export default function AboutPage() {
             <p className="text-[#B5903A] text-[10px] tracking-[0.35em] uppercase font-medium font-[family-name:var(--font-body)] mb-3">
               The Craft
             </p>
-            <h2 className="font-[family-name:var(--font-heading)] text-3xl md:text-4xl text-[#1C1C1C] font-light mb-10">
+            <h2 className="font-[family-name:var(--font-heading)] text-3xl md:text-4xl text-[#1C1C1C] font-light mb-3">
               Centuries of Tradition
             </h2>
+            <div className="w-12 h-0.5 bg-[#B5903A] mb-10" />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
               {[

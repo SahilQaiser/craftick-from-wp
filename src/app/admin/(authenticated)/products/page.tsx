@@ -1,6 +1,5 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { getProducts } from "@/lib/db";
-import { categories } from "@/lib/categories";
+import { getProducts, getCategories } from "@/lib/db";
 import { formatPrice } from "@/lib/products-static";
 import Link from "next/link";
 import Image from "next/image";
@@ -16,7 +15,10 @@ interface Props {
 export default async function AdminProductsPage({ searchParams }: Props) {
   const params = await searchParams;
   const { env } = await getCloudflareContext({ async: true });
-  const allProducts = await getProducts(env.DB);
+  const [allProducts, categories] = await Promise.all([
+    getProducts(env.DB),
+    getCategories(env.DB),
+  ]);
 
   const filtered = params.category
     ? allProducts.filter((p) => p.category === params.category)
