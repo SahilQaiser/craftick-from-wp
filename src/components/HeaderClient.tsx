@@ -112,7 +112,7 @@ export default function HeaderClient({ categories }: { categories: Category[] })
               </Link>
               <Link href="/contact" aria-label="Contact" className="hidden md:block p-2 text-[#1C1C1C] hover:text-[#B5903A] transition-colors">
                 <svg className="w-[20px] h-[20px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
               </Link>
               <Link href="/cart" aria-label="Cart" className="relative p-2 text-[#1C1C1C] hover:text-[#B5903A] transition-colors">
