@@ -6,6 +6,7 @@ type Props = {
   initialCodEnabled: boolean;
   initialWaNumber: string;
   initialWaMessage: string;
+  initialAnnouncement: string;
 };
 
 async function saveSetting(key: string, value: string) {
@@ -17,10 +18,11 @@ async function saveSetting(key: string, value: string) {
   if (!res.ok) throw new Error("Failed to save");
 }
 
-export default function ConfigForm({ initialCodEnabled, initialWaNumber, initialWaMessage }: Props) {
+export default function ConfigForm({ initialCodEnabled, initialWaNumber, initialWaMessage, initialAnnouncement }: Props) {
   const [codEnabled, setCodEnabled] = useState(initialCodEnabled);
   const [waNumber, setWaNumber] = useState(initialWaNumber);
   const [waMessage, setWaMessage] = useState(initialWaMessage);
+  const [announcement, setAnnouncement] = useState(initialAnnouncement);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
 
@@ -124,6 +126,51 @@ export default function ConfigForm({ initialCodEnabled, initialWaNumber, initial
             className="bg-[#1C1C1C] text-white text-xs tracking-widest uppercase px-6 py-3 font-medium hover:bg-[#B5903A] transition-colors disabled:opacity-50"
           >
             {saving ? "Saving…" : "Save WhatsApp Settings"}
+          </button>
+        </form>
+      </div>
+
+      {/* Announcement Banner */}
+      <div className="bg-white border border-[#E8E3DC] p-6">
+        <h2 className="text-sm font-semibold text-[#1C1C1C] mb-1">Announcement Banner</h2>
+        <p className="text-xs text-[#8C8680] mb-5">Text shown in the header announcement bar. Leave blank to hide it.</p>
+
+        <form
+          onSubmit={async (e) => {
+            e.preventDefault();
+            setSaving(true);
+            setMessage("");
+            try {
+              await saveSetting("announcement", announcement.trim());
+              showSaved();
+            } catch {
+              setMessage("Error saving announcement.");
+            } finally {
+              setSaving(false);
+            }
+          }}
+          className="space-y-4"
+        >
+          <div>
+            <label className="block text-[10px] tracking-widest uppercase text-[#6B6560] font-medium mb-1.5">
+              Banner Text
+            </label>
+            <input
+              type="text"
+              value={announcement}
+              onChange={(e) => setAnnouncement(e.target.value)}
+              placeholder="Free Shipping on Orders Above ₹5,000 · Guaranteed Authenticity"
+              className="w-full border border-[#E8E3DC] px-3 py-2.5 text-sm text-[#1C1C1C] bg-[#F8F5F0] focus:outline-none focus:border-[#B5903A] transition-colors"
+            />
+            <p className="mt-1.5 text-[10px] text-[#8C8680]">Tip: use · (middle dot) to separate multiple messages.</p>
+          </div>
+
+          <button
+            type="submit"
+            disabled={saving}
+            className="bg-[#1C1C1C] text-white text-xs tracking-widest uppercase px-6 py-3 font-medium hover:bg-[#B5903A] transition-colors disabled:opacity-50"
+          >
+            {saving ? "Saving…" : "Save Announcement"}
           </button>
         </form>
       </div>

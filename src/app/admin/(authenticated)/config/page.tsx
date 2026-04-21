@@ -6,10 +6,11 @@ export const dynamic = "force-dynamic";
 
 export default async function AdminConfigPage() {
   const { env } = await getCloudflareContext({ async: true });
-  const [codSetting, waNumber, waMessage] = await Promise.all([
+  const [codSetting, waNumber, waMessage, announcement] = await Promise.all([
     getSetting(env.DB, "enable_cod", "false"),
     getSetting(env.DB, "whatsapp_number", "919149545438"),
     getSetting(env.DB, "whatsapp_message", "Hi! I'm interested in your Kashmiri handcrafted products."),
+    getSetting(env.DB, "announcement", "Free Shipping on Orders Above ₹5,000 · Guaranteed Authenticity"),
   ]);
 
   return (
@@ -23,6 +24,7 @@ export default async function AdminConfigPage() {
         initialCodEnabled={codSetting === "true"}
         initialWaNumber={waNumber}
         initialWaMessage={waMessage}
+        initialAnnouncement={announcement}
       />
     </div>
   );
