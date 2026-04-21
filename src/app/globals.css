@@ -36,7 +36,12 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font-heading), 'Georgia', serif;
 }
 
@@ -48,13 +53,16 @@ h1, h2, h3, h4, h5, h6 {
 ::-webkit-scrollbar {
   width: 6px;
 }
+
 ::-webkit-scrollbar-track {
   background: var(--color-cream);
 }
+
 ::-webkit-scrollbar-thumb {
   background: var(--color-border);
   border-radius: 3px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-gold);
 }
@@ -84,6 +92,7 @@ img {
     opacity: 0;
     transform: translateY(12px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -92,4 +101,21 @@ img {
 
 .animate-fade-in-up {
   animation: fadeInUp 0.5s ease forwards;
+}
+
+/* Bidirectional marquee (announcement banner) */
+@keyframes marquee-bounce {
+  0% {
+    transform: translateX(18%);
+  }
+
+  100% {
+    transform: translateX(-18%);
+  }
+}
+
+.animate-marquee-bounce {
+  display: inline-block;
+  white-space: nowrap;
+  animation: marquee-bounce 5s ease-in-out infinite alternate;
 }

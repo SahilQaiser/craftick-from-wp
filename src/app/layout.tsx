@@ -3,6 +3,7 @@ import { Cormorant_Garamond, Jost } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/contexts/CartContext";
 import CartToast from "@/components/CartToast";
+import WhatsAppFAB from "@/components/WhatsAppFAB";
 
 const cormorant = Cormorant_Garamond({
   variable: "--font-heading",
@@ -52,6 +53,7 @@ export default function RootLayout({
         <CartProvider>
           {children}
           <CartToast />
+          <WhatsAppFAB />
         </CartProvider>
       </body>
     </html>

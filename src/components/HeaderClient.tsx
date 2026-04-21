@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useCart } from "@/contexts/CartContext";
 import type { Category } from "@/lib/db";
 
-const ANNOUNCEMENT = "Free Shipping on Orders Above ₹5,000 · Guaranteed Authenticity";
+const DEFAULT_ANNOUNCEMENT = "Free Shipping on Orders Above ₹5,000 · Guaranteed Authenticity";
 
 type NavItem = {
   label: string;
@@ -43,9 +43,19 @@ function buildNavItems(categories: Category[]): NavItem[] {
 export default function HeaderClient({ categories }: { categories: Category[] }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [announcementVisible, setAnnouncementVisible] = useState(true);
+  const [announcement, setAnnouncement] = useState(DEFAULT_ANNOUNCEMENT);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [mobileExpanded, setMobileExpanded] = useState<string | null>(null);
   const { totalItems } = useCart();
+
+  useEffect(() => {
+    fetch("/api/config/public")
+      .then((res) => res.json() as Promise<{ announcement?: string }>)
+      .then(({ announcement: text }) => {
+        if (text !== undefined) setAnnouncement(text);
+      })
+      .catch(() => {});
+  }, []);
 
   const navItems = buildNavItems(categories);
   const activeItem = navItems.find((i) => i.label === activeDropdown);
@@ -54,11 +64,11 @@ export default function HeaderClient({ categories }: { categories: Category[] })
     <header className="fixed top-0 left-0 right-0 z-50">
 
       {/* ── Announcement Bar ── */}
-      {announcementVisible && (
-        <div className="relative flex items-center justify-center px-4 py-2 bg-[#EDE8DF]">
-          <p className="text-[10px] tracking-[0.22em] uppercase font-medium text-center font-[family-name:var(--font-body)] text-[#4A4440]">
+      {announcementVisible && announcement && (
+        <div className="relative flex items-center justify-center px-4 py-2 bg-[#EDE8DF] overflow-hidden">
+          <p className="animate-marquee-bounce text-[10px] tracking-[0.22em] uppercase font-medium text-center font-[family-name:var(--font-body)] text-[#4A4440]">
             <span className="text-[#B5903A] mr-1.5">✦</span>
-            {ANNOUNCEMENT}
+            {announcement}
             <span className="text-[#B5903A] ml-1.5">✦</span>
           </p>
           <button
